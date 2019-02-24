@@ -1,0 +1,14 @@
+number of non-dominated paths: 45
+number of dominated labels: 40
+The best label is: 
+Node: 7, Time: 56.20001, Profit: 1751247.4, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 4, 8, 10, 12, 2, 6], openNodes: [], drivingTime: 7.5, startTimeDailyRest: 32.500004
+Node: 6, Time: 50.050007, Profit: 1759375.9, WeightCapacityUsed: 19.0, VolumeCapacityUsed: 54.0, unreachablePickupNodes: [14, 4, 8, 10, 12, 2, 6], openNodes: [6], drivingTime: 3.25, startTimeDailyRest: 32.500004
+Node: 13, Time: 49.650005, Profit: 1153543.1, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 4, 8, 10, 12, 2], openNodes: [], drivingTime: 3.25, startTimeDailyRest: 32.500004
+Node: 12, Time: 46.000004, Profit: 1158347.2, WeightCapacityUsed: 4.0, VolumeCapacityUsed: 5.0, unreachablePickupNodes: [14, 4, 8, 10, 12, 2], openNodes: [12], drivingTime: 0.0, startTimeDailyRest: 32.500004
+Node: 5, Time: 31.300001, Profit: 1078610.4, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 4, 8, 10], openNodes: [], drivingTime: 4.25, startTimeDailyRest: 11.35
+Node: 4, Time: 25.85, Profit: 1085789.4, WeightCapacityUsed: 12.0, VolumeCapacityUsed: 37.0, unreachablePickupNodes: [14, 4, 8, 10], openNodes: [4], drivingTime: 0.0, startTimeDailyRest: 11.35
+Node: 15, Time: 9.55, Profit: 732021.2, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14], openNodes: [], drivingTime: 7.75, startTimeDailyRest: 0.0
+Node: 14, Time: 2.5, Profit: 741886.5, WeightCapacityUsed: 18.0, VolumeCapacityUsed: 51.0, unreachablePickupNodes: [14], openNodes: [14], drivingTime: 2.5, startTimeDailyRest: 0.0
+Node: 0, Time: 0.0, Profit: 0.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [], openNodes: [], drivingTime: 0.0, startTimeDailyRest: 0.0
+Node: 1, Time: 58.100006, Profit: 1749978.1, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 4, 8, 10, 12, 2, 6], openNodes: [], drivingTime: 0.0, startTimeDailyRest: 58.100006
+Took 17 milli seconds
