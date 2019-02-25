@@ -10,8 +10,8 @@ public class Main {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		long startTime = System.nanoTime();
-		// TODO Auto-generated method stub
-		String datafile = "7T7R1V_java.txt";
+		
+		String datafile = "1T6R1V_java.txt";
 		
 		File file = new File ("7R1V_java_results.txt");
 		
@@ -24,8 +24,6 @@ public class Main {
 		
 		PrintWriter pw = new PrintWriter(file);	
 		
-		//ArrayList<PickupNode> pickupnodes = new ArrayList<PickupNode>();
-		//ArrayList<DeliveryNode> deliverynodes = new ArrayList<DeliveryNode>();
 		Vector<Node> nodes = new Vector<Node>();
 		Vector<Node> depot = new Vector<Node>();
 		Vector<Node> pickupNodes = new Vector<Node>();

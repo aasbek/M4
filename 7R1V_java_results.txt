@@ -1,14 +1,14 @@
-number of non-dominated paths: 64
-number of dominated labels: 99
+number of non-dominated paths: 37
+number of dominated labels: 33
 The best label is: 
-Node: 13, Time: 43.65, Profit: 1195318.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 10, 8, 12, 2, 4, 6], openNodes: [], drivingTime: 6.75, startTimeDailyRest: 20.2
-Node: 12, Time: 35.0, Profit: 1207700.0, WeightCapacityUsed: 19.0, VolumeCapacityUsed: 44.0, unreachablePickupNodes: [14, 10, 8, 12, 2], openNodes: [12], drivingTime: 0.0, startTimeDailyRest: 20.2
-Node: 9, Time: 31.2, Profit: 214638.42, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 10, 8], openNodes: [], drivingTime: 0.0, startTimeDailyRest: 20.2
-Node: 8, Time: 13.6, Profit: 231311.16, WeightCapacityUsed: 1.0, VolumeCapacityUsed: 1.0, unreachablePickupNodes: [14, 10, 8], openNodes: [8], drivingTime: 6.5, startTimeDailyRest: 0.0
-Node: 11, Time: 9.55, Profit: 186453.56, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 10], openNodes: [], drivingTime: 3.75, startTimeDailyRest: 0.0
-Node: 10, Time: 7.0, Profit: 189304.75, WeightCapacityUsed: 13.0, VolumeCapacityUsed: 43.0, unreachablePickupNodes: [14, 10], openNodes: [10], drivingTime: 2.5, startTimeDailyRest: 0.0
-Node: 15, Time: 2.95, Profit: 65568.88, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14], openNodes: [], drivingTime: 1.25, startTimeDailyRest: 0.0
-Node: 14, Time: 1.0, Profit: 67932.0, WeightCapacityUsed: 7.0, VolumeCapacityUsed: 20.0, unreachablePickupNodes: [14], openNodes: [14], drivingTime: 0.0, startTimeDailyRest: 0.0
-Node: 0, Time: 0.0, Profit: 0.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [], openNodes: [], drivingTime: 0.0, startTimeDailyRest: 0.0
-Node: 1, Time: 45.550003, Profit: 1194048.8, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [14, 10, 8, 12, 2, 4, 6], openNodes: [], drivingTime: 0.0, startTimeDailyRest: 44.2
-Took 30 milli seconds
+Node: 13, Time: 93.75, Profit: 788016.5, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [10, 8, 4, 12, 6], openNodes: [], dailyDrivingTime: 5.25, startTimeDailyRest: 72.0
+Node: 12, Time: 90.0, Profit: 792921.1, WeightCapacityUsed: 5.0, VolumeCapacityUsed: 21.0, unreachablePickupNodes: [10, 8, 4, 12], openNodes: [12], dailyDrivingTime: 2.0, startTimeDailyRest: 72.0
+Node: 5, Time: 48.45, Profit: 710677.6, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [10, 8, 4], openNodes: [], dailyDrivingTime: 5.25, startTimeDailyRest: 31.900002
+Node: 4, Time: 42.9, Profit: 718251.2, WeightCapacityUsed: 3.0, VolumeCapacityUsed: 11.0, unreachablePickupNodes: [10, 8, 4], openNodes: [4], dailyDrivingTime: 0.0, startTimeDailyRest: 31.900002
+Node: 9, Time: 28.550001, Profit: 615943.56, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [10, 8], openNodes: [], dailyDrivingTime: 3.25, startTimeDailyRest: 13.200001
+Node: 8, Time: 24.45, Profit: 621056.75, WeightCapacityUsed: 11.0, VolumeCapacityUsed: 34.0, unreachablePickupNodes: [10, 8], openNodes: [8], dailyDrivingTime: 0.25, startTimeDailyRest: 13.200001
+Node: 11, Time: 10.1, Profit: 402801.22, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [10], openNodes: [], dailyDrivingTime: 8.0, startTimeDailyRest: 0.0
+Node: 10, Time: 5.25, Profit: 408595.1, WeightCapacityUsed: 21.0, VolumeCapacityUsed: 58.0, unreachablePickupNodes: [10], openNodes: [10], dailyDrivingTime: 5.25, startTimeDailyRest: 0.0
+Node: 0, Time: 0.0, Profit: 0.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0
+Node: 1, Time: 94.25, Profit: 787682.5, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [10, 8, 4, 12, 6], openNodes: [], dailyDrivingTime: 5.25, startTimeDailyRest: 72.0
+Took 22 milli seconds

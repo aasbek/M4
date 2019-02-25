@@ -13,7 +13,7 @@ import java.util.Vector;
 		public Node node;
 //		public Vector<Integer> path;
 		public Vector<Integer> unreachablePickupNodes;
-		public float drivingTime;
+		public float dailyDrivingTime;
 		public float startTimeDailyRest;
 		public Vector<Integer> openNodes; //pickupnodes
 		public int numberDailyRests;
@@ -22,7 +22,7 @@ import java.util.Vector;
 
 	public String toString() {
 		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit + ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
-				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", drivingTime: " + drivingTime + ", startTimeDailyRest: " + startTimeDailyRest;
+				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest;
 		//for (int  i : path) {
 			//string += i;
 		//}
