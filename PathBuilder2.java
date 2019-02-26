@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
-public class PathBuilder {
+public class PathBuilder2 {
 	public Vector<Node> nodes;
 	public Vector<Node> pickupNodes;
 	public Vector<Node> deliveryNodes;
@@ -13,10 +13,10 @@ public class PathBuilder {
 	public PrintWriter pw;
 	private double zeroTol = 0.001;
 	private int numberOfDominatedLabels;
-//	public Preprocessing preprocess;
+	public Preprocessing preprocess;
 	
 	
-	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw) {
+	public PathBuilder2(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw) {
 		this.pickupNodes = pickupNodes;
 		this.nodes = nodes;
 		this.deliveryNodes = deliveryNodes;
@@ -25,10 +25,10 @@ public class PathBuilder {
 		this.pw = pw;
 		numberOfDominatedLabels = 0;
 		
-	//	preprocess = new Preprocessing(pickupNodes, deliveryNodes, nodes, depot, inputdata);
-	//	preprocess.unreachableNodeCombination();
-	//	preprocess.unreachableDeliveryNode();
-	//	preprocess.unreachableDeliveryPairs();
+		preprocess = new Preprocessing(pickupNodes, deliveryNodes, nodes, depot, inputdata);
+		preprocess.unreachableNodeCombination();
+		preprocess.unreachableDeliveryNode();
+		preprocess.unreachableDeliveryPairs();
 	}
 	
 	
@@ -49,16 +49,15 @@ public class PathBuilder {
 		// Computing total daily driving time
 		float dailyDrivingTime = L.dailyDrivingTime + inputdata.getTime(L.node, node);
 		float startTimeDailyRest = L.startTimeDailyRest;
-		int numberDailyRests = L.numberDailyRests;
 		
-		int totalDistance = L.totalDistance + inputdata.getDistance(L.node, node);
+		int numberDailyRests = L.numberDailyRests;
 		
 	
 		// Time in the label equals max of: 1) the predecessor's time plus travel- and service time to this node, 2) early time window in this node
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService, node.earlyTimeWindow); 	
 		
 		// If the restrictions on daily driving time (9 hours) or the limit of 24 hours without a daily rest are not met, do not extend the label
-		if(dailyDrivingTime > 9 || arrivalTime > 24*numberDailyRests ) {  //arrivalTime - 11 - startTimeDailyRest > 24
+		if(dailyDrivingTime > 9 || arrivalTime > 24*numberDailyRests) {  
 			return null;
 		}
 		
@@ -69,14 +68,14 @@ public class PathBuilder {
 		}
 	
 		// Run preprocessing on the nodes in the open nodes set
-//		for(int i : L.openNodes) {
-//			if(arrivalTime-zeroTol > preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]) {
+		for(int i : L.openNodes) {
+			if(arrivalTime-zeroTol > preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]) {
 //				System.out.println(arrivalTime +"less than unreach: "+preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]);
 //				System.out.println(node.number+" "+(i+1));
 //				System.exit(0);
-//				return null;
-//			}
-//		}
+				return null;
+			}
+		}
 		
 		
 		
@@ -92,7 +91,6 @@ public class PathBuilder {
 			L2.dailyDrivingTime = dailyDrivingTime;
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.numberDailyRests = numberDailyRests;
-			L2.totalDistance = totalDistance;
 	
 			L2.unreachablePickupNodes = new Vector<Integer>();
 			// Adding all elements from the predecessor's unreachablePickupNodes to this label's unreachablePickupNodes
@@ -107,9 +105,8 @@ public class PathBuilder {
 			}
 			
 			// Calculating profit in the depot node
-			L2.profit = L.profit 
-						//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-						//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+			L2.profit = L.profit - inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+						- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 						- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 						- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time); 
 			return L2;
@@ -132,7 +129,6 @@ public class PathBuilder {
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.time =arrivalTime;
 			L2.numberDailyRests = numberDailyRests;
-			L2.totalDistance = totalDistance;
 			
 			// Adding the weight corresponding to a pickup node if the pickup node is visited and there is sufficient weight capacity on the vehicle 
 			if(L.weightCapacityUsed + node.weight <= inputdata.weightCap){
@@ -162,35 +158,38 @@ public class PathBuilder {
 				L2.openNodes.add(i);
 			}
 			
-			// Adding the node to the set of unreachable nodes and open nodes
 			L2.unreachablePickupNodes.add(node.number); 
 			L2.openNodes.add(node.number);
 
-			// Running preprocessing on the label and checking whether the node in unreachable due to time windows
-//			for(Node pickup: pickupNodes) {
-//				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
-//					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
-//					L2.unreachablePickupNodes.add(pickup.number);
-//				}
-//			}
-			
+			for(Node pickup: pickupNodes) {
+				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
+					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
+					L2.unreachablePickupNodes.add(pickup.number);
+//					System.out.println("addind unreach node");
+				}
+			}
 			// Calculating the profit (revenue - costs) when a pickup node is visited 
-			L2.profit = L.profit + (inputdata.revenue * node.weight * inputdata.getDistance(node, node.getCorrespondingNode(node, nodes)))
-							//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-							//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+			
+				L2.profit = L.profit + (inputdata.revenue * node.weight * inputdata.getDistance(node, node.getCorrespondingNode(node, nodes)))
+							- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+							- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 							- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
-			return L2;
+				//System.out.println(L2.profit);
+				//System.out.println(L.profit + (inputdata.revenue * node.weight * inputdata.getDistance(node, node.getCorrespondingNode(node, nodes), inputdata)));
+				//System.out.println(inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node,inputdata));
+				//System.out.println(inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node,inputdata));
+				//System.out.println(inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node, inputdata));
+				//System.out.println((inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time));
+				return L2;
 		}
 	
-		
 		
 		else if(node.type == "DeliveryNode") {
 			// Cannot visit a delivery node whose pickup node has not been visited 
 			if (!L.openNodes.contains((node.number-1))){	
 				return null;
 			}
-			
 			Label L2 = new Label();
 			L2.node = node;
 			L2.predesessor = L;
@@ -198,8 +197,8 @@ public class PathBuilder {
 			L2.dailyDrivingTime = dailyDrivingTime;
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.numberDailyRests = numberDailyRests;
-			L2.totalDistance = totalDistance;
 			
+	//	
 			
 			L2.unreachablePickupNodes = new Vector<Integer>();
 			// Adding all elements from the predecessor's unreachablePickupNodes to this label's unreachablePickupNodes
@@ -213,36 +212,58 @@ public class PathBuilder {
 				L2.openNodes.add(i);
 			}
 			
-			// Remove the node's corresponding pickup node from the open nodes list when the delivery node i visited
+			// Time in the label equals max of: 1) the predecessor's time plus travel- and service time to this node, 2) early time window in this node
+			L2.time = arrivalTime; 	
+			
+			// If the time is greater than the late time window of a node, return null
+			
 			if (L.openNodes.contains(node.getCorrespondingNode(node, nodes).number)){
 				L2.openNodes.remove(L.openNodes.indexOf(node.getCorrespondingNode(node, nodes).number));
 			}
-			
 			// Removing the weight corresponding to a delivery node when the delivery node is visited
 			L2.weightCapacityUsed = L.weightCapacityUsed - node.weight;
-			
 			// Removing the volume corresponding to a delivery node when the delivery node is visited
 			L2.volumeCapacityUsed = L.volumeCapacityUsed - node.volume;
 			
-			
-			// Calculating the profit when a pickup node is visited (visiting a delivery node only creates costs)
-			L2.profit = L.profit 
-					//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-					//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+			L2.profit = L.profit - inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+					- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 					- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
-			// Running preprocessing on the label and checking whether the node in unreachable due to time windows
-//			for(Node pickup: pickupNodes) {
-//				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
-//					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
-//					L2.unreachablePickupNodes.add(pickup.number);
+//			for (Node pickupNode: pickupNodes){
+//				if ( !L2.unreachablePickupNodes.contains(pickupNode.number)){
+//					if (L2.time + inputdata.getTime(node, pickupNode) + node.weight *inputdata.timeTonService > pickupNode.lateTimeWindow){
+//						L2.unreachablePickupNodes.add(pickupNode.number);
+//					}
+//					else if (L2.time + inputdata.getTime(node, pickupNode) + node.weight *inputdata.timeTonService +
+//							inputdata.getTime(pickupNode, nodes.get(pickupNode.number+1)) + pickupNode.weight *inputdata.timeTonService> nodes.get(pickupNode.number+1).lateTimeWindow){
+//						L2.unreachablePickupNodes.add(pickupNode.number);
+//					}
+//					
 //				}
 //			}
+			for(Node pickup: pickupNodes) {
+				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
+					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
+					L2.unreachablePickupNodes.add(pickup.number);
+//					System.out.println("addind unreach node");
+				}
+			}
 			return L2;
 		}
-				
-	
+		
+		// Adding the volume corresponding to a pickup node if the pickup node is visited and there is sufficient volume capacity on the vehicle 
+//		if(node.type=="PickupNode") {
+//			
+//		}
+		
+		
+		
+		
+		
+		
+		
+		// Calculating the profit (only costs) when a delivery node or the depots are visited
 		
 //		L2.path.add(node.number);
 		return null;
@@ -277,8 +298,6 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float dailyDrivingTimeDay = 0;
 		float timeLeftDailyRest = 0;
 		
-		int totalDistance = L.totalDistance + inputdata.getDistance(L.node, node);
-		
 
 		// Time in the label equals max of: 1) the predecessor's time plus travel- and service time to this node, 2) early time window in this node
 		//float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService, node.earlyTimeWindow); 	
@@ -288,38 +307,27 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float timeLeft = 9 - L.dailyDrivingTime;
 		float startTimeDailyRestDriving = Math.min(arrivalTime - dailyRestTime, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeft));
 		float dailyDrivingTimeDriving = arrivalTime - dailyRestTime - startTimeDailyRestDriving; //how long driven since last break
-		
+
 		int numberDailyRests = L.numberDailyRests;
 		//startTimeDailyRest = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
 		
-		if(arrivalTime - dailyRestTime - startTimeDailyRest <= 24) {
-			startTimeDailyRestDay = arrivalTime - dailyRestTime;
+		if(arrivalTime <= 24 * numberDailyRests) {//(arrivalTime - dailyRestTime - startTimeDailyRest < 24) {
+			startTimeDailyRestDay = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
 			dailyDrivingTimeDay = 0;
-		}
-		
-		//if(arrivalTime <= 24 * numberDailyRests) {//(arrivalTime - dailyRestTime - startTimeDailyRest < 24) {
-			//startTimeDailyRestDay = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
-			//dailyDrivingTimeDay = 0;
-			//System.out.println(numberDailyRests);
+			System.out.println(numberDailyRests);
 			//System.out.println("1");
-		//}
-		
-		else if(arrivalTime - dailyRestTime - startTimeDailyRest >= 24) {
-			startTimeDailyRestDay = L.startTimeDailyRest + 24;
-			dailyDrivingTimeDay = 0;//Math.max(0, L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay);
 		}
-		
-		//else if (arrivalTime  > 24*numberDailyRests) {//(arrivalTime - dailyRestTime - startTimeDailyRest >= 24) {
-		//	startTimeDailyRestDay =  24*numberDailyRests;
-		//	dailyDrivingTimeDay = arrivalTime - dailyRestTime - startTimeDailyRestDriving; //L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - startTimeDailyRest - dailyRestTime; //L.time + inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime  - dailyRestTime - startTimeDailyRestDay;
-		//	System.out.println(numberDailyRests);
+		else if (arrivalTime  > 24*numberDailyRests) {//(arrivalTime - dailyRestTime - startTimeDailyRest >= 24) {
+			startTimeDailyRestDay =  24*numberDailyRests;
+			dailyDrivingTimeDay = arrivalTime - dailyRestTime - startTimeDailyRestDriving; //L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - startTimeDailyRest - dailyRestTime; //L.time + inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime  - dailyRestTime - startTimeDailyRestDay;
+			System.out.println(numberDailyRests);
 		//	if (startTimeDailyRestDay > arrivalTime - dailyRestTime && startTimeDailyRest < arrivalTime - dailyRestTime + node.weight*inputdata.timeTonService) {
 			//	return null;
 			
 			
 			//else{startTimeDailyRestDay = arrivalTime - dailyRestTime - (arrivalTime - L.startTimeDailyRest - dailyRestTime - 24 ) ;
 			//dailyDrivingTimeDay = arrivalTime - dailyRestTime - startTimeDailyRestDay;}
-	//	}
+		}
 
 		
 		//startTimeDailyRest = startTimeDailyRestDriving;
@@ -341,14 +349,14 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		}
 	
 		
-//		for(int i : L.openNodes) {
-//			if(arrivalTime-zeroTol > preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]) {
+		for(int i : L.openNodes) {
+			if(arrivalTime-zeroTol > preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]) {
 //				System.out.println(arrivalTime +"less than unreach: "+preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]);
 //				System.out.println(node.number+" "+(i+1));
 //				System.exit(0);
-//				return null;
-//			}
-//		}
+				return null;
+			}
+		}
 		// Cannot arrive at end depot without delivering every pickup
 		
 		
@@ -366,7 +374,6 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.dailyDrivingTime = dailyDrivingTime;
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.numberDailyRests = numberDailyRests + 1;
-			L2.totalDistance = totalDistance;
 	//	
 			
 			L2.unreachablePickupNodes = new Vector<Integer>();
@@ -383,9 +390,8 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			
 			
 			
-			L2.profit = L.profit 
-						//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-						//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+			L2.profit = L.profit - inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+						- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 						- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 						- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time); 
 			return L2;
@@ -406,7 +412,6 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.dailyDrivingTime = dailyDrivingTime;
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.numberDailyRests = numberDailyRests + 1;
-			L2.totalDistance = totalDistance;
 			
 	//	
 			
@@ -457,18 +462,18 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 //					
 //				}
 //			}
-//			for(Node pickup: pickupNodes) {
-//				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
-//					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
-//					L2.unreachablePickupNodes.add(pickup.number);
+			for(Node pickup: pickupNodes) {
+				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
+					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
+					L2.unreachablePickupNodes.add(pickup.number);
 //					System.out.println("addind unreach node");
-//				}
-//			}
+				}
+			}
 			// Calculating the profit (revenue - costs) when a pickup node is visited 
 			
 				L2.profit = L.profit + (inputdata.revenue * node.weight * inputdata.getDistance(node, node.getCorrespondingNode(node, nodes)))
-							//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-							//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+							- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+							- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 							- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 				//System.out.println(L2.profit);
@@ -493,7 +498,6 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.dailyDrivingTime = dailyDrivingTime;
 			L2.startTimeDailyRest = startTimeDailyRest;
 			L2.numberDailyRests = numberDailyRests + 1;
-			L2.totalDistance = totalDistance;
 			
 	//	
 			
@@ -522,10 +526,9 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			// Removing the volume corresponding to a delivery node when the delivery node is visited
 			L2.volumeCapacityUsed = L.volumeCapacityUsed - node.volume;
 			
-			L2.profit = L.profit 
-					//- inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
-					//- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
-					 - inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
+			L2.profit = L.profit - inputdata.fuelPrice*inputdata.fuelConsumptionEmptyTruckPerKm*inputdata.getDistance(L.node,node)
+					- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
+					- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 //			for (Node pickupNode: pickupNodes){
@@ -540,13 +543,13 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 //					
 //				}
 //			}
-//			for(Node pickup: pickupNodes) {
-//				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
-//					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
-//					L2.unreachablePickupNodes.add(pickup.number);
+			for(Node pickup: pickupNodes) {
+				if(!L2.unreachablePickupNodes.contains(pickup.number)) {
+					if(preprocess.unreachableNodesFromNode.get(node.number)[pickup.number]+zeroTol<L2.time)
+					L2.unreachablePickupNodes.add(pickup.number);
 //					System.out.println("addind unreach node");
-//				}
-//			}
+				}
+			}
 			return L2;
 		}
 		
@@ -583,7 +586,6 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		L.volumeCapacityUsed = 0;
 		L.numberDailyRests = 1;
 		L.predesessor = null;
-		L.totalDistance = 0;
 		L.unreachablePickupNodes = new Vector<Integer>();
 		L.openNodes = new Vector<Integer>();		
 //		L.path.add(L.node.number);
@@ -618,18 +620,14 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 //			}
 			for(Node pickup :pickupNodes) { // Going through all nodes except node 0 and node 1 (the depot nodes)
 				Label newLabel = LabelExtension(pickup, label);
-				
 				if(newLabel!=null) {
-					System.out.println(newLabel.toString());
 					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 						unprocessedQueue.add(newLabel); 
 						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
 					}
 				}
 				Label newLabel2 = LabelExtensionWithDailyRest(pickup, label);
-				
 				if(newLabel2!=null) {
-					System.out.println(newLabel2.toString());
 					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
 						unprocessedQueue.add(newLabel2); 
 						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
@@ -638,18 +636,14 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			}
 			for(int i : label.openNodes) { // Going through all nodes except node 0 and node 1 (the depot nodes)
 				Label newLabel = LabelExtension(nodes.get(i+1), label);
-				
 				if(newLabel!=null) {
-					System.out.println(newLabel.toString());
 					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 						unprocessedQueue.add(newLabel); 
 						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
 					}
 				}
 				Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(i+1), label);
-				
 				if(newLabel2!=null) {
-					System.out.println(newLabel2.toString());
 					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
 						unprocessedQueue.add(newLabel2); 
 						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
@@ -657,17 +651,13 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 				}
 			}
 			Label newLabel = LabelExtension(nodes.get(1), label); // Adding node 1 (the end depot node) to the end of the path 
-			
 			if(newLabel!=null) {
-				System.out.println(newLabel.toString());
 				if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 					list.add(newLabel);
 				}
 			}
 			Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(1), label);
-			
 			if(newLabel2!=null) {
-				System.out.println(newLabel2.toString());
 				if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
 					list.add(newLabel2);
 				}

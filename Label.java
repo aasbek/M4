@@ -18,12 +18,13 @@ import java.util.Vector;
 		public Vector<Integer> openNodes; //pickupnodes
 		public int numberDailyRests;
 	//	public float waitingTime;
+		public int totalDistance;
 		
 
 	public String toString() {
 		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit + ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
-				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest;
-		//for (int  i : path) {
+				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", totalDistance: " + totalDistance;
+		//for (int  i : path) { 
 			//string += i;
 		//}
 //		Label temp = predesessor;

@@ -1,13 +1,13 @@
 NodesVehiclek , 0,1,2,3,4,5,6,7,8,9,10,11,
 VolumeCap , 81
 WeightCap , 30 
-EarlyTimeWindow ,0.00,0.00,43.00,46.00,29.00,33.50,47.00,51.15,31.00,31.75,38.00,41.25,
-LateTimeWindow , 144.00,144.00,55.00,58.00,41.00,45.50,59.00,63.15,43.00,43.75,50.00,53.25,
-WeightLoad , 3,18,4,16,10,
-VolumeLoad , 10,42,8,45,35,
-PickupNodes , 7,9,2,9,10,
-DeliveryNodes , 3,10,7,8,7,
-StartDepot , 9 
+EarlyTimeWindow ,0.00,0.00,7.00,10.75,10.00,16.75,10.00,13.75,6.00,8.50,10.00,14.00,
+LateTimeWindow , 144.00,144.00,19.00,22.75,22.00,28.75,22.00,25.75,18.00,20.50,22.00,26.00,
+WeightLoad , 5,14,17,19,18,
+VolumeLoad , 11,44,42,41,41,
+PickupNodes , 5,2,3,8,1,
+DeliveryNodes , 3,10,5,2,9,
+StartDepot , 5 
 EndDepot , 11 
 NumberOfCities, 11 
 Times: 
@@ -44,9 +44,9 @@ TimeTonService, 0.1
  Revenue, 100
  
 
-!Freight order 1  has pickup in  Dombås and delivery in  Hamar
-!Freight order 2  has pickup in  Ringebu and delivery in Stjørdal
-!Freight order 3  has pickup in Oslo and delivery in  Dombås
-!Freight order 4  has pickup in  Ringebu and delivery in Lillehammer
-!Freight order 5  has pickup in Stjørdal and delivery in  Dombås
-!The vehicle has startdepot  Ringebu
+!Freight order 1  has pickup in  Røros and delivery in  Hamar
+!Freight order 2  has pickup in Oslo and delivery in Stjørdal
+!Freight order 3  has pickup in  Hamar and delivery in  Røros
+!Freight order 4  has pickup in Lillehammer and delivery in Oslo
+!Freight order 5  has pickup in  Trondheim and delivery in  Ringebu
+!The vehicle has startdepot  Røros
