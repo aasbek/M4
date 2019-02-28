@@ -14,16 +14,22 @@ import java.util.Vector;
 //		public Vector<Integer> path;
 		public Vector<Integer> unreachablePickupNodes;
 		public float dailyDrivingTime;
+		public float consecutiveDrivingTime;
 		public float startTimeDailyRest;
+		public float startTimeIntermediateBreak;
 		public Vector<Integer> openNodes; //pickupnodes
 		public int numberDailyRests;
+		public float workingTime;
 	//	public float waitingTime;
 		public int totalDistance;
 		
 
 	public String toString() {
-		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit + ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
-				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", totalDistance: " + totalDistance;
+		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit +
+				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", totalDistance: " + totalDistance;
+		
+		// ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
+		
 		//for (int  i : path) { 
 			//string += i;
 		//}

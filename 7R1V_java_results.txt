@@ -1,10 +1,14 @@
-number of non-dominated paths: 14
-number of dominated labels: 4
+number of non-dominated paths: 136
+number of dominated labels: 171
 The best label is: 
-Node: 3, Time: 58.450005, Profit: 631422.06, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [], dailyDrivingTime: 5.15, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 1249
-Node: 2, Time: 52.800003, Profit: 639027.06, WeightCapacityUsed: 15.0, VolumeCapacityUsed: 32.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [2], dailyDrivingTime: 1.0, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 930
-Node: 9, Time: 34.15, Profit: 178111.45, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8], openNodes: [], dailyDrivingTime: 3.25, startTimeDailyRest: 13.0, numberDailyRests: 2, totalDistance: 406
-Node: 8, Time: 30.0, Profit: 183418.66, WeightCapacityUsed: 9.0, VolumeCapacityUsed: 19.0, unreachablePickupNodes: [8], openNodes: [8], dailyDrivingTime: 0.0, startTimeDailyRest: 13.0, numberDailyRests: 2, totalDistance: 178
-Node: 0, Time: 0.0, Profit: 0.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0, numberDailyRests: 1, totalDistance: 0
-Node: 1, Time: 59.950005, Profit: 630420.06, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [], dailyDrivingTime: 5.15, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 1249
-Took 12 milli seconds
+Node: 5, Time: 54.399998, Profit: 471296.2, unreachablePickupNodes: [10, 8, 2, 6, 4], openNodes: [], dailyDrivingTime: 7.5, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 51.6, totalDistance: 1141
+Node: 7, Time: 53.6, Profit: 472128.5, unreachablePickupNodes: [10, 8, 2, 6, 4], openNodes: [4], dailyDrivingTime: 7.0, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 51.6, totalDistance: 1111
+Node: 4, Time: 47.0, Profit: 480781.25, unreachablePickupNodes: [10, 8, 2, 6, 4], openNodes: [6, 4], dailyDrivingTime: 1.25, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 46.25, totalDistance: 702
+Node: 6, Time: 43.100002, Profit: 443488.78, unreachablePickupNodes: [10, 8, 2, 6], openNodes: [6], dailyDrivingTime: 0.0, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 24.25, totalDistance: 604
+Node: 11, Time: 29.150002, Profit: 360466.1, unreachablePickupNodes: [10, 8, 2], openNodes: [], dailyDrivingTime: 5.0, startTimeDailyRest: 6.0, numberDailyRests: 2, StartTimeIntermediateBreak: 24.25, totalDistance: 506
+Node: 3, Time: 27.45, Profit: 362573.84, unreachablePickupNodes: [10, 8, 2], openNodes: [10], dailyDrivingTime: 4.0, startTimeDailyRest: 6.0, numberDailyRests: 2, StartTimeIntermediateBreak: 24.25, totalDistance: 427
+Node: 2, Time: 25.0, Profit: 365798.44, unreachablePickupNodes: [10, 8, 2], openNodes: [10, 2], dailyDrivingTime: 2.25, startTimeDailyRest: 6.0, numberDailyRests: 2, StartTimeIntermediateBreak: 24.25, totalDistance: 308
+Node: 10, Time: 17.0, Profit: 289737.47, unreachablePickupNodes: [10, 8], openNodes: [10], dailyDrivingTime: 0.0, startTimeDailyRest: 6.0, numberDailyRests: 2, StartTimeIntermediateBreak: 0.0, totalDistance: 154
+Node: 0, Time: 0.0, Profit: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0, numberDailyRests: 1, StartTimeIntermediateBreak: 0.0, totalDistance: 0
+Node: 1, Time: 54.499996, Profit: 471229.38, unreachablePickupNodes: [10, 8, 2, 6, 4], openNodes: [], dailyDrivingTime: 7.5, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 51.6, totalDistance: 1141
+Took 45 milli seconds
