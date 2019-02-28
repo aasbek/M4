@@ -1,0 +1,805 @@
+!@encoding CP1252
+model PDPTW
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+! Compiler directives
+! ------------------------------------------------------------------------------
+options explterm
+options noimplicit
+
+uses "mmxprs", "mmsystem";
+
+parameters
+	Datafile = '19T5R1V_mosel.txt';
+	SolutionTime = 14400;
+	Tolerance = 0.0001;
+end-parameters
+
+! Display options
+setparam('xprs_verbose',true);
+setparam('xprs_miplog',-10);
+
+! Stopping criteria
+setparam('xprs_miprelstop',0.00);
+setparam('xprs_maxtime',-SolutionTime);
+
+
+
+! --------------------------------------------------------------------------------------------------------------
+
+declarations
+	Nodes:					set of integer;
+	PickupNodes:			set of integer;
+	DeliveryNodes:			set of integer;		
+	NodesVehiclek:			set of integer;				
+	PositionsVehiclek:		set of integer;
+	Vehicles:				set of integer;
+	NodesWithoutStartDepot: set of integer;
+	NodesWithoutEndDepot: 	set of integer;
+end-declarations
+! Declare sets
+
+initializations from Datafile
+	Nodes;
+	PickupNodes;			
+	DeliveryNodes;			
+	NodesVehiclek;			
+	PositionsVehiclek;		
+	Vehicles;
+	NodesWithoutStartDepot;
+	NodesWithoutEndDepot;
+end-initializations
+
+
+! Parameters
+! ------------------------------------------------------------------------------------------------------------
+
+
+declarations
+	nPositionsVehiclek: 						integer;
+	WeightLoad: 								array(PickupNodes, DeliveryNodes)					of integer;
+	VolumeLoad:									array(PickupNodes, DeliveryNodes)					of integer;
+	WeightCap: 									integer;
+	VolumeCap:									integer;
+	TimeTonService: 							real;
+	DrivingTime:								array(NodesVehiclek, NodesVehiclek)					of real;
+	DrivingDistance:							array(NodesVehiclek, NodesVehiclek)					of integer;
+	DrivingTimeVehicles:						array(NodesVehiclek, NodesVehiclek, Vehicles)		of real;
+	DrivingDistanceVehicles:					array(NodesVehiclek, NodesVehiclek, Vehicles)		of integer;
+	StartDepotTime:								array(PickupNodes, Vehicles)						of real;
+	StartDepotDistance:							array(PickupNodes, Vehicles)						of integer;	
+	TimeBigM:									integer;
+	Revenue:   									integer;
+	EarlyTimeWindow:							array(NodesVehiclek)								of real;
+	LateTimeWindow:								array(NodesVehiclek)								of real;
+	MaxConsecutiveDrivingHours: 				real;
+	IntermediateBreakTime: 						real;
+	MaxConsecutiveWorkingHours:					integer;
+	MaxDailyDrivingHours: 						integer;
+	MinDailyRestingHours:						integer;
+	HoursInDay:									integer;
+	MaxWeeklyDrivingHours:						integer;
+	DrivingBigM1:								integer;
+	DrivingBigM2:								integer;
+	MaxBreakDuration:							integer;
+	MaxWaitingTime:								integer;
+	FuelPrice:									real;
+	FuelConsumptionEmptyTruckPerKm: 			real;
+	FuelConsumptionPerTonPerKm: 				real;
+	LabourCostPerHour:							integer;
+	OtherDistanceDependentCostsPerKm:			real; 
+	OtherTimeDependentCostsPerHour: 			integer; 
+	TotalServiceTime:							array(NodesVehiclek)								of real;
+	Status:     string; 
+	StopStatus: string; 
+	start:		real;
+end-declarations
+
+initializations from Datafile
+	nPositionsVehiclek;
+	WeightLoad;
+	VolumeLoad;
+	WeightCap;
+	VolumeCap;
+	TimeTonService;
+	DrivingTime;
+	DrivingDistance;
+	StartDepotTime;
+	StartDepotDistance;
+	TimeBigM;
+	Revenue;
+	EarlyTimeWindow;			
+	LateTimeWindow;					
+	MaxConsecutiveDrivingHours;
+	IntermediateBreakTime;
+	MaxConsecutiveWorkingHours;
+	MaxDailyDrivingHours;
+	MinDailyRestingHours;
+	HoursInDay;
+	MaxWeeklyDrivingHours;
+	DrivingBigM1;
+	DrivingBigM2;
+	MaxBreakDuration;
+	MaxWaitingTime;
+	FuelPrice;							
+	FuelConsumptionEmptyTruckPerKm; 		
+	FuelConsumptionPerTonPerKm;	
+	LabourCostPerHour; 	
+	OtherDistanceDependentCostsPerKm;				
+	OtherTimeDependentCostsPerHour;					
+end-initializations 
+
+!creating driving time matrix for each vehicle
+forall(kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek | ii<>jj) do
+	if(ii=0 and jj in PickupNodes) then
+		DrivingTimeVehicles(ii,jj,kk):= StartDepotTime(jj,kk);
+		DrivingDistanceVehicles(ii,jj,kk):= StartDepotDistance(jj,kk);	
+	elif(ii>=2) then
+		DrivingTimeVehicles(ii,jj,kk):= DrivingTime(ii,jj);
+		DrivingDistanceVehicles(ii,jj,kk):= DrivingDistance(ii,jj);
+	end-if
+end-do
+
+!creating service time per load
+forall(ii in NodesVehiclek)  do
+	if (ii = 0) then
+		TotalServiceTime(ii) := 0;
+	elif (ii in PickupNodes) then
+		TotalServiceTime(ii) := WeightLoad(ii,ii+1)*TimeTonService; 
+	elif (ii in DeliveryNodes) then 
+		TotalServiceTime(ii) := WeightLoad(ii-1,ii)*TimeTonService;
+	end-if
+end-do
+
+!Variables
+!--------------------------------------------------------------------------------------------------------------------
+
+
+declarations
+	Flow:				dynamic array(NodesVehiclek, NodesVehiclek, PositionsVehiclek, Vehicles)	of mpvar;
+	WeightDestination:	dynamic array(NodesVehiclek, NodesVehiclek, DeliveryNodes, Vehicles)		of mpvar;
+	VolumeDestination:	dynamic array(NodesVehiclek, NodesVehiclek, DeliveryNodes, Vehicles)		of mpvar;
+	ServiceStart:		dynamic array(NodesVehiclek, Vehicles)										of mpvar;
+	TravelTimeVar: 		dynamic array(NodesVehiclek, NodesVehiclek, Vehicles)						of mpvar;
+	NumberOfBreaks:		dynamic array(NodesVehiclek, NodesVehiclek, PositionsVehiclek, Vehicles) 	of mpvar;
+	DrivingTimeVar: 	dynamic array(PositionsVehiclek, PositionsVehiclek, Vehicles)				of mpvar;
+	WorkingTimeVar:		dynamic array(PositionsVehiclek, PositionsVehiclek, Vehicles)				of mpvar;
+	DailyRests:			dynamic array(NodesVehiclek, NodesVehiclek, PositionsVehiclek, Vehicles) 	of mpvar;
+	LoadCommittedTo:	dynamic array(PickupNodes, Vehicles)										of mpvar; 
+end-declarations	
+
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles  | ii<>jj and jj<>0 and ii<>1) do
+	if (not (ii in Nodes and jj in Nodes and EarlyTimeWindow(ii) + DrivingTime(ii,jj) >= LateTimeWindow(jj)) and 
+	not (ii in PickupNodes and jj in PickupNodes and WeightLoad(ii,ii+1) + WeightLoad(jj,jj+1) > WeightCap) and 
+	not (ii in PickupNodes and jj in PickupNodes and VolumeLoad(ii,ii+1) + VolumeLoad(jj,jj+1) > VolumeCap) and 
+	not (ii in PickupNodes and jj = 1) and not(ii = 0 and jj in DeliveryNodes) and not(ii = 0 and qq <> 2) and 
+	not (jj = 1 and qq mod(2) <> 0)) then
+			create(Flow(ii,jj,qq,kk));
+	end-if
+end-do !x
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, dd in DeliveryNodes, kk in Vehicles | ii<> jj) do
+	create(WeightDestination(ii,jj,dd,kk));
+end-do !l^W
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, dd in DeliveryNodes, kk in Vehicles | ii<> jj) do
+	create(VolumeDestination(ii,jj,dd,kk));
+end-do !l^Q
+
+forall (ii in NodesVehiclek, kk in Vehicles) do
+	create(ServiceStart(ii, kk));
+end-do !t_ik
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, kk in Vehicles | ii <> jj) do 
+	create (TravelTimeVar(ii,jj,kk));
+end-do !t^T_ijk
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles | ii<>jj) do
+	create (NumberOfBreaks(ii,jj,qq,kk));
+end-do !b_ijqk
+
+forall (q1 in PositionsVehiclek, q2 in PositionsVehiclek, kk in Vehicles | q1 <= q2) do
+	create (DrivingTimeVar(q1,q2,kk));
+end-do !t^D_q'q''k
+
+forall (q1 in PositionsVehiclek, q2 in PositionsVehiclek, kk in Vehicles | q1 <= q2) do
+	create (WorkingTimeVar(q1,q2,kk));
+end-do !t^W_q'q''k
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek,qq in  PositionsVehiclek, kk in Vehicles | ii <> jj)do
+	create(DailyRests (ii,jj,qq,kk));
+end-do !r_ijqk
+
+forall (ii in PickupNodes, kk in Vehicles) do
+	create(LoadCommittedTo(ii,kk));
+end-do !y^ik
+
+
+! Constraints
+!--------------------------------------------------------------------------------------------------------------------
+
+
+!declarations of constraints
+declarations
+	MustTakeLoad: 			dynamic array(NodesVehiclek)																of linctr;
+	OneVehicle:				dynamic array(PickupNodes)																	of linctr;
+	LeaveStartDepot:		dynamic array(Vehicles)																		of linctr;
+	ArriveEndDepot: 		dynamic array(Vehicles)																		of linctr;
+	QFlow:					dynamic array(Vehicles, Nodes, PositionsVehiclek)											of linctr;
+	OnePositionPerNode:		dynamic array(Vehicles, PositionsVehiclek)													of linctr;
+	Pairing:				dynamic array(Vehicles, PickupNodes)														of linctr;
+	FlowWeightPickup:		dynamic array(Vehicles, PickupNodes, DeliveryNodes)											of linctr; 
+	FlowVolumePickup:		dynamic array(Vehicles, PickupNodes,DeliveryNodes)											of linctr; 
+	FlowWeightDelivery:	 	dynamic array(Vehicles, DeliveryNodes,DeliveryNodes)										of linctr; 
+	FlowVolumeDelivery:		dynamic array(Vehicles, DeliveryNodes, DeliveryNodes)										of linctr; 
+	FlowWeight:				dynamic array(Vehicles, NodesVehiclek, DeliveryNodes) 										of linctr; 
+	FlowVolume:				dynamic array(Vehicles, NodesVehiclek, DeliveryNodes) 										of linctr; 	
+	MaxWeigthCap:			dynamic array(Vehicles, NodesVehiclek,  NodesVehiclek)										of linctr;
+	MaxVolumeCap:			dynamic array(Vehicles, NodesVehiclek,  NodesVehiclek)										of linctr;
+	TimeAll:				dynamic array(Vehicles, NodesVehiclek, NodesVehiclek)										of linctr;
+	Precedence: 			dynamic array(Vehicles, PickupNodes, DeliveryNodes)											of linctr;
+	EarlyTimeWindowCon:		dynamic array(Vehicles, NodesVehiclek)														of linctr;
+	LateTimeWindowCon:		dynamic array(Vehicles, NodesVehiclek)														of linctr;
+	TravelTime: 			dynamic array(Vehicles, NodesVehiclek, NodesVehiclek)										of linctr;
+	TotalDrivingTime: 		dynamic array(Vehicles, PositionsVehiclek, PositionsVehiclek) 								of linctr;
+	TotalWorkingTime: 		dynamic array(Vehicles, PositionsVehiclek, PositionsVehiclek) 								of linctr;
+	BreaksDrivingTime: 		dynamic array(Vehicles, PositionsVehiclek, PositionsVehiclek)								of linctr;
+	BreaksWorkingTime:		dynamic array(Vehicles, PositionsVehiclek, PositionsVehiclek)								of linctr;
+	LegalBreaks:			dynamic array(Vehicles, NodesVehiclek, NodesVehiclek, PositionsVehiclek)					of linctr;
+	DailyDrivingHours: 		dynamic array(Vehicles, PositionsVehiclek, PositionsVehiclek)								of linctr;
+	DailyRestingHours: 		dynamic array(Vehicles, NodesVehiclek, NodesVehiclek, PositionsVehiclek)					of linctr;
+	DailyRest: 				dynamic array(Vehicles, NodesVehiclek, PositionsVehiclek)									of linctr;
+	LegalDailyRest: 		dynamic array(Vehicles, NodesVehiclek, NodesVehiclek, PositionsVehiclek)					of linctr;
+	WeeklyDrivingHours:		dynamic array(Vehicles)																		of linctr;		
+	NoServiceStart:			dynamic array(Vehicles, NodesVehiclek) 														of linctr;
+! Objective function
+	Revenues:						linctr;
+	OtherDistanceDependent: 		linctr;
+	OtherTimeDependent:				linctr;
+	FuelCosts: 						linctr;
+	LaborCosts: 					linctr;
+end-declarations
+
+
+! Mathematical model - flow constraints
+!--------------------------------------------------------------------------------------------------------------------
+
+
+! Flow - must pickup if committed to
+forall (ii in PickupNodes) do
+	MustTakeLoad(ii) := 
+		sum(kk in Vehicles, jj in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,jj,qq,kk) - sum(kk in Vehicles) LoadCommittedTo(ii,kk) = 0;
+end-do
+
+
+! Only one vehicle can commit to a load
+forall(ii in PickupNodes) do 
+	OneVehicle(ii) :=
+		sum(kk in Vehicles) LoadCommittedTo(ii,kk) <= 1;
+end-do
+
+
+! Leaving start depot
+forall (kk in Vehicles) do 
+	LeaveStartDepot(kk) :=
+		sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(0,jj,qq,kk) = 1;
+end-do
+
+
+! Must return to end depot
+forall (kk in Vehicles) do
+	ArriveEndDepot(kk) := 
+		sum(ii in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,1,qq,kk) = 1;
+end-do
+
+
+! Q-flow
+forall (kk in Vehicles, jj in Nodes, qq in PositionsVehiclek | qq<nPositionsVehiclek ) do
+	QFlow (kk,jj,qq) := 
+		sum(ii in NodesWithoutEndDepot) Flow(ii,jj,qq,kk) - sum(ii in NodesWithoutStartDepot) Flow(jj,ii,qq+1,kk)  = 0;
+end-do
+
+
+! Pairing
+forall(kk in Vehicles, ii in PickupNodes) do
+	Pairing(kk,ii) := 
+		sum (jj in Nodes, qq in PositionsVehiclek) Flow (ii,jj,qq,kk) - sum(jj in NodesVehiclek, qq  in PositionsVehiclek) Flow(ii+1,jj,qq,kk) = 0;
+end-do
+
+
+
+! Mathematical model - load constraints	
+!-------------------------------------------------------------------------------------------------------------------------------------------------	
+
+
+! Weight out of pickup node = weight in to pickup node + weight picked up
+forall (kk in Vehicles, ii in PickupNodes, dd in DeliveryNodes | dd = ii+1) do
+	FlowWeightPickup (kk,ii,dd) :=
+		sum(jj in NodesVehiclek) WeightDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) WeightDestination (ii,jj,dd,kk) + WeightLoad(ii,dd) - WeightCap * (1- sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,jj,qq,kk)) <= 0;
+end-do
+
+
+! Volume out of pickup node = volume in to pickup node + volume picked up
+forall (kk in Vehicles, ii in PickupNodes, dd in DeliveryNodes | dd = ii+1) do
+	FlowVolumePickup (kk,ii,dd) :=
+		sum(jj in NodesVehiclek) VolumeDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) VolumeDestination (ii,jj,dd,kk) + VolumeLoad(ii,dd) - VolumeCap * (1- sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,jj,qq,kk)) <= 0;
+end-do
+
+
+! Weight in to delivery node = weight out of delivery node + weight delivered
+forall (kk in Vehicles, ii in DeliveryNodes, dd in DeliveryNodes | dd = ii) do
+	FlowWeightDelivery (kk,ii,dd) :=	
+	sum(jj in NodesVehiclek) WeightDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) WeightDestination (ii,jj,dd,kk) - WeightLoad(dd-1,dd)- WeightCap * (1- sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,jj,qq,kk)) <= 0;
+end-do
+
+
+! Volume in to delivery node = volume out of delivery node + volume delivered
+forall (kk in Vehicles, ii in DeliveryNodes, dd in DeliveryNodes | dd = ii) do
+	FlowVolumeDelivery (kk,ii,dd) :=	
+	sum(jj in NodesVehiclek) VolumeDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) VolumeDestination (ii,jj,dd,kk) - VolumeLoad(dd-1,dd)- VolumeCap * (1- sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(ii,jj,qq,kk)) <= 0;
+end-do
+
+
+! No weight change when not visiting pickup or delivery node
+forall ( kk in Vehicles, ii in NodesVehiclek, dd in DeliveryNodes | dd <> ii and dd <> ii+1) do
+	FlowWeight (kk,ii,dd) :=
+	sum(jj in NodesVehiclek) WeightDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) WeightDestination (ii,jj,dd,kk)= 0;
+end-do
+
+
+! No volume change when not visiting pickup or delivery node
+forall ( kk in Vehicles, ii in NodesVehiclek, dd in DeliveryNodes | dd <> ii and dd <> ii+1) do
+	FlowVolume (kk,ii,dd) :=
+	sum(jj in NodesVehiclek) VolumeDestination (jj,ii,dd,kk) - sum(jj in NodesVehiclek) VolumeDestination (ii,jj,dd,kk)= 0;
+end-do
+
+
+! Weight never exceeding capacity
+forall (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek) do 
+	MaxWeigthCap(kk,ii,jj) := 
+	sum (dd in DeliveryNodes) WeightDestination (ii,jj,dd,kk) <= WeightCap*sum(qq in PositionsVehiclek) Flow(ii,jj,qq,kk);
+end-do
+
+
+! Volume never exceeding capacity
+forall (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek) do 
+	MaxVolumeCap(kk,ii,jj) := 
+	sum (dd in DeliveryNodes) VolumeDestination (ii,jj,dd,kk) <= VolumeCap*sum(qq in PositionsVehiclek) Flow(ii,jj,qq,kk);
+end-do
+
+
+
+! Mathematical model - time constraints	
+!-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+! Travel time from node i to j
+forall (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek) do
+	TravelTime(kk,ii,jj) :=
+		TravelTimeVar(ii,jj,kk) = sum(qq in PositionsVehiclek) DrivingTimeVehicles(ii,jj,kk) * Flow(ii,jj,qq,kk) + sum(qq in PositionsVehiclek) (IntermediateBreakTime*(NumberOfBreaks(ii,jj,qq,kk)) + MinDailyRestingHours * DailyRests(ii,jj,qq,kk));
+end-do
+
+! Time flow in all nodes
+forall (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek) do 
+	TimeAll(kk,ii,jj) :=
+	ServiceStart(ii,kk) + TotalServiceTime(ii) + TravelTimeVar(ii,jj,kk) - ServiceStart(jj,kk) - maxlist(0, LateTimeWindow(ii) + TotalServiceTime(ii) + DrivingTimeVehicles(ii,jj,kk) + MaxBreakDuration + IntermediateBreakTime * ceil(DrivingTimeVehicles(ii,jj,kk)/IntermediateBreakTime) - EarlyTimeWindow(jj)) * (1 - sum(qq in PositionsVehiclek) Flow(ii,jj,qq,kk)) <= 0;
+end-do
+
+
+! Precedence
+forall (kk in Vehicles, ii in PickupNodes, dd in DeliveryNodes | dd = ii+1) do
+	Precedence(kk,ii,dd) :=
+	ServiceStart(ii,kk) + TotalServiceTime(ii) + DrivingTimeVehicles(ii,dd,kk) - ServiceStart(dd,kk) - (LateTimeWindow(ii) - EarlyTimeWindow(ii) + LateTimeWindow(dd) - EarlyTimeWindow(dd) + DrivingTimeVehicles(ii, dd,kk)) * (1 - sum(jj in NodesVehiclek, qq in PositionsVehiclek) Flow(dd,jj,qq,kk)) <= 0;
+end-do
+
+
+! Early time window
+forall (kk in Vehicles, ii in NodesVehiclek) do
+	EarlyTimeWindowCon(kk,ii) :=
+	EarlyTimeWindow(ii)<= ServiceStart(ii,kk);
+end-do
+
+
+! Late time window 
+forall (kk in Vehicles, ii in NodesVehiclek) do
+	LateTimeWindowCon(kk,ii) :=
+	ServiceStart(ii,kk) <= LateTimeWindow(ii);
+end-do
+
+
+
+! Mathematical model - driver  constraints	
+!---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+! Driving time between all combinations of positions
+forall( kk in Vehicles, q1 in PositionsVehiclek, q2 in PositionsVehiclek | q1 <= q2) do
+	TotalDrivingTime (kk, q1, q2):=
+		DrivingTimeVar (q1,q2,kk) = sum(qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek ) DrivingTimeVehicles(ii,jj,kk) * Flow(ii,jj,qq,kk) ;
+end-do
+
+
+! Working time between all combinatios of positions
+!forall (kk in Vehicles, q1 in PositionsVehiclek, q2 in PositionsVehiclek | q1 <= q2) do
+!	TotalWorkingTime (kk, q1, q2 ) :=
+!		WorkingTimeVar ( q1, q2, kk) = sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek ) DrivingTimeVehicles(ii,jj,kk)* Flow(ii,jj,qq,kk) + sum (qq in q1..q2, ii in PickupNodes, jj in NodesVehiclek ) TotalServiceTime(ii) * Flow(ii,jj,qq,kk) + sum (qq in q1..q2, ii in DeliveryNodes, jj in NodesVehiclek )  TotalServiceTime(ii)* Flow(ii,jj,qq,kk) ;
+!end-do
+
+
+! Must take 45 minute break if more than 4.5 hours driving time
+!forall (kk in Vehicles, q1 in PositionsVehiclek, q2 in PositionsVehiclek | q1 <= q2) do
+!	BreaksDrivingTime (kk,q1,q2) :=
+!		DrivingTimeVar(q1,q2,kk) <= MaxConsecutiveDrivingHours  + MaxConsecutiveDrivingHours * sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek) NumberOfBreaks(ii,jj,qq,kk) + DrivingBigM2 * sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek)DailyRests(ii,jj,qq,kk) ;
+!end-do				
+
+
+! Must take 45 minute break if more than 6 hours of working time
+!forall (kk in Vehicles, q1 in PositionsVehiclek, q2 in PositionsVehiclek | q1 <= q2) do
+!	BreaksWorkingTime (kk,q1,q2) :=
+!		WorkingTimeVar(q1,q2,kk) <= MaxConsecutiveWorkingHours  + MaxConsecutiveWorkingHours * sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek) NumberOfBreaks(ii,jj,qq,kk) + DrivingBigM2 * sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek)DailyRests(ii,jj,qq,kk) ;
+!end-do
+
+! Can not take a break on a arc that is not driven
+!forall (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) do
+!	LegalBreaks (kk,ii,jj,qq) :=
+!		NumberOfBreaks(ii,jj,qq,kk) <= ceil(DrivingTimeVehicles(ii,jj,kk)/IntermediateBreakTime) * Flow (ii,jj,qq,kk);
+!end-do
+
+! Cannot drive more than 9 hours in total in a day
+forall (kk in Vehicles, q1 in PositionsVehiclek, q2 in PositionsVehiclek | q1 <= q2) do
+	DailyDrivingHours(kk, q1, q2) :=
+	DrivingTimeVar(q1,q2,kk) <= MaxDailyDrivingHours + MaxDailyDrivingHours * sum (qq in q1..q2, ii in NodesVehiclek, jj in NodesVehiclek) DailyRests(ii,jj,qq,kk);
+end-do
+
+
+! Must take a daily rest every 24 hours 
+forall(kk in Vehicles, jj1 in NodesVehiclek, q1 in PositionsVehiclek | jj1 <>1) do
+	DailyRest(kk,jj1,q1) :=
+	ServiceStart(jj1,kk) <= HoursInDay + HoursInDay * sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in 2..q1) DailyRests(ii,jj,qq,kk) + 10000 * (1 - sum(ii in NodesVehiclek, qq in 2..q1) Flow(ii, jj1, qq, kk));
+end-do
+
+
+! Can only take rests on arcs that are driven
+forall(kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) do
+	LegalDailyRest(kk,ii,jj,qq) :=
+	DailyRests(ii,jj,qq,kk) <=  Flow(ii,jj,qq,kk);
+end-do
+
+
+!Each car can drive a maximum total of 56 hours in a week
+!forall(kk in Vehicles) do
+!	WeeklyDrivingHours(kk) :=
+!	sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) DrivingTimeVehicles(ii,jj,kk) * Flow(ii,jj,qq,kk) <= MaxWeeklyDrivingHours;
+!end-do
+
+
+! Mathematical model - binary constraints	
+!-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+! x_ijqk
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) do
+	Flow(ii,jj,qq,kk) is_binary;
+end-do
+
+
+! r_ijqk
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) do
+	DailyRests(ii,jj,qq,kk) is_binary;
+end-do
+
+! y_ik
+forall (ii in PickupNodes, kk in Vehicles) do
+	LoadCommittedTo(ii,kk) is_binary;
+end-do
+
+! Mathematical model - integer constraints
+!-------------------------------------------------------------------------------------------------------------------------------------------------------------------	
+
+
+! b_ijqk	
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) do
+	NumberOfBreaks(ii,jj,qq,kk) is_integer;
+end-do
+
+
+! Mathematical model - Objective function
+!----------------------------------------------------------------------------------------------------------------------------------------------------------	
+
+! Calculating revenues
+Revenues := 
+sum (ii in PickupNodes, kk in Vehicles) Revenue * WeightLoad(ii,ii+1) * DrivingDistanceVehicles(ii,ii+1,kk) *LoadCommittedTo(ii,kk);
+
+! Calculating fuel cost
+FuelCosts := 
+FuelPrice *( sum (kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) DrivingDistanceVehicles(ii,jj,kk) * FuelConsumptionEmptyTruckPerKm * Flow(ii,jj,qq,kk) + sum(kk in Vehicles, ii in NodesVehiclek, jj in NodesVehiclek, dd in DeliveryNodes) DrivingDistanceVehicles(ii,jj,kk) * FuelConsumptionPerTonPerKm * WeightDestination(ii,jj,dd,kk));
+
+! Calculating other distance-dependent costs
+OtherDistanceDependent :=
+OtherDistanceDependentCostsPerKm * sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) DrivingDistanceVehicles(ii,jj,kk)*Flow(ii,jj,qq,kk);
+
+! Calculating labour costs
+LaborCosts :=
+LabourCostPerHour * sum(kk in Vehicles) (ServiceStart(1,kk)); 
+
+! Calculating other time-dependent costs
+OtherTimeDependent :=
+OtherTimeDependentCostsPerHour * sum(kk in Vehicles) (ServiceStart(1,kk)); 
+
+! OBJECTIVE FUNCTION
+maximize(Revenues   - LaborCosts - OtherTimeDependent - OtherDistanceDependent - FuelCosts ); 
+
+
+
+
+! Printing
+!----------------------------------------------------------------------------------------------------------------------------------------------------------	
+
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+writeln;
+writeln('The total distance is ', sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) getsol(Flow(ii,jj,qq,kk))*DrivingDistanceVehicles(ii,jj,kk));
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+writeln;
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles  | getsol(Flow(ii,jj,qq,kk)) > 0.01) do
+	write(strfmt(getsol(Flow(ii,jj,qq,kk)),4), ' is sent from ');
+	if (ii in PickupNodes) then
+		write(' pickup node     ',ii, '  to  ');
+		elif (ii in DeliveryNodes) then
+			write(' delivery node   ', ii, '  to  '); 
+			elif (ii = 0 or ii = 1) then
+				write(' node            ', ii, '  to  ' );
+	end-if
+	if (jj in PickupNodes) then
+		write('pickup node     ',jj);
+		elif (jj in DeliveryNodes) then
+			write('delivery node   ', jj); 
+			elif(jj = 0 or jj = 1) then
+				write('node            ',jj);
+	end-if
+	writeln('     in position  ' ,qq, ' with vehicle  ', kk);
+end-do
+
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+forall(kk in Vehicles) do
+		write( (sum(ii in NodesVehiclek, jj in NodesVehiclek) (sum(dd in DeliveryNodes) getsol(WeightDestination(ii,jj,dd,kk))/WeightCap)) / (sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) getsol(Flow(ii,jj,qq,kk))-2)  );
+		writeln(' is the average capacity utilization for vehicle ', kk, ' when not empty.');
+end-do
+
+writeln;
+
+write('The average capacity utilization for the fleet of vehicles (when not empty) is: ', (sum(kk in Vehicles) (sum(ii in NodesVehiclek, jj in NodesVehiclek) (sum(dd in DeliveryNodes) getsol(WeightDestination(ii,jj,dd,kk))/WeightCap)) / (sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) getsol(Flow(ii,jj,qq,kk))-2) / getsize(Vehicles)));
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+if not(sum(ii in NodesVehiclek, jj in NodesVehiclek,qq in PositionsVehiclek, kk in Vehicles) getsol(Flow(ii,jj,qq,kk)) = 0 ) then 
+	forall (ii in NodesVehiclek, kk in Vehicles | getsol(ServiceStart(ii,kk))>=0.01 and ii <> 1) do
+			write(strfmt(getsol(ServiceStart(ii,kk)),5), '   is start of service time at node   ', ii, '    with vehicle ', kk );
+			write('   and time windows: ', EarlyTimeWindow(ii), ' - ', LateTimeWindow(ii));
+			writeln(' ');
+	end-do
+	forall (ii in NodesVehiclek, kk in Vehicles | getsol(ServiceStart(ii,kk))>=0.01 and ii = 1) do
+			write(strfmt(getsol(ServiceStart(1,kk)),5), '   is start of service time at node   ', 1, '    with vehicle ', kk );
+			write('   and time windows: ', EarlyTimeWindow(1), ' - ', LateTimeWindow(1));
+			writeln(' ');
+	end-do
+end-if
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, kk in Vehicles | getsol(TravelTimeVar (ii,jj,kk))>0.01 ) do
+	write(strfmt(getsol(TravelTimeVar (ii,jj,kk)),5), '	is the travel duration of the trip from node ');
+	writeln( ii, ' to node ', jj, ' with vehicle ', kk);
+end-do
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+! Getting solution status
+case getparam("xprs_mipstatus") of
+	XPRS_MIP_OPTIMAL: Status := "Optimal";
+	XPRS_MIP_NO_SOL_FOUND: Status := "No solution found";
+	XPRS_MIP_INFEAS: Status := "Infeasible";
+	XPRS_MIP_UNBOUNDED: Status := "Unbounded";
+	XPRS_MIP_SOLUTION: Status := "Solution found";
+	else 	  Status := "Unknown";
+end-case
+
+! Getting stop status
+case getparam("xprs_stopstatus") of
+	XPRS_STOP_NONE: StopStatus := "search concluded";
+	XPRS_STOP_TIMELIMIT: StopStatus := "Time limit reached";
+	XPRS_STOP_NODELIMIT: StopStatus := "Node limit reached";
+	XPRS_STOP_MIPGAP: StopStatus := "Mip gap sufficiently small";
+	XPRS_STOP_SOLLIMIT: StopStatus := "Solution limit reached";
+	else 	  StopStatus := "Unknown";
+end-case
+	
+declarations
+	gap: real;
+end-declarations
+
+! Outputs
+writeln("Status    : ",Status);
+writeln("Global search stopped due to    : ",StopStatus);
+writeln("Objective value      : ", strfmt(getobjval,12,2)); 
+writeln("");
+writeln("Fuel costs           : ", strfmt(getact(FuelCosts),12,2));
+writeln('Other dist.dep. costs: ', strfmt(getact(OtherDistanceDependent),12,2));
+writeln('Labor costs          : ', strfmt(getact(LaborCosts), 12,2));
+writeln('Other time dep. costs: ', strfmt(getact(OtherTimeDependent),12,2));
+writeln('The total costs are  : ',  strfmt(getact(FuelCosts) + getact(OtherDistanceDependent) + getact(LaborCosts) + getact(OtherTimeDependent),12,2));
+writeln("");
+writeln("Best bound :       ", strfmt(getparam("xprs_bestbound"),12,2));
+writeln("Number rows(orig): ", strfmt(getparam('xprs_originalrows'),12,2));
+writeln("Number col(orig):  ", strfmt(getparam('xprs_originalcols'),12,2));
+writeln("Total time:        ", strfmt(gettime-start,12,2));
+writeln("Number nodes :     ", strfmt(getparam("xprs_nodes"),12,2));
+writeln("The gap is : 		",(getparam('xprs_bestbound') - getparam('xprs_mipobjval')) / getparam('xprs_bestbound'));
+
+
+
+
+! Printing to file
+!----------------------------------------------------------------------------------------------------------------------------------------------------------	
+
+
+! The name of the file 
+fopen("test 1-15, 5R.txt", F_APPEND);
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+writeln("LESS THAN TRUCKLOAD - DATAFILE WITH ", getsize(Vehicles), " VEHICLES AND ", getsize(PickupNodes), " CUSTOMER REQUESTS");
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+writeln("Status    : ",Status);
+writeln("Global search stopped due to    : ",StopStatus);
+writeln("Objective value  : ", strfmt(getobjval,12,2)); 
+writeln("");
+writeln("Fuel costs           : ", strfmt(getact(FuelCosts),12,2));
+writeln('Other dist.dep. costs: ', strfmt(getact(OtherDistanceDependent),12,2));
+writeln('Labor costs          : ', strfmt(getact(LaborCosts), 12,2));
+writeln('Other time dep. costs: ', strfmt(getact(OtherTimeDependent),12,2));
+writeln('The total costs are  : ',  strfmt(getact(FuelCosts) + getact(OtherDistanceDependent) + getact(LaborCosts) + getact(OtherTimeDependent),12,2));
+writeln("");
+writeln("Best bound :       ", strfmt(getparam("xprs_bestbound"),12,2));
+writeln("Number rows(orig): ", strfmt(getparam('xprs_originalrows'),12,2));
+writeln("Number col(orig):  ", strfmt(getparam('xprs_originalcols'),12,2));
+writeln("Total time:        ", strfmt(gettime-start,12,2));
+writeln("Number nodes :     ", strfmt(getparam("xprs_nodes"),12,2));
+writeln("The gap is : 		", (getparam('xprs_bestbound') - getparam('xprs_mipobjval')) / getparam('xprs_bestbound'));
+writeln("");
+write('Total avg. cap. util.: ', (sum(kk in Vehicles) (sum(ii in NodesVehiclek, jj in NodesVehiclek) (sum(dd in DeliveryNodes) getsol(WeightDestination(ii,jj,dd,kk))/WeightCap)) / (sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) getsol(Flow(ii,jj,qq,kk))-2) / getsize(Vehicles)));
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+writeln;
+forall (ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles  | getsol(Flow(ii,jj,qq,kk)) > 0.01) do
+	write(strfmt(getsol(Flow(ii,jj,qq,kk)),4), ' is sent from ');
+	if (ii in PickupNodes) then
+		write(' pickup node     ',ii, '  to  ');
+		elif (ii in DeliveryNodes) then
+			write(' delivery node   ', ii, '  to  '); 
+			elif (ii = 0 or ii = 1) then
+				write(' node            ', ii, '  to  ' );
+	end-if
+	if (jj in PickupNodes) then
+		write('pickup node     ',jj);
+		elif (jj in DeliveryNodes) then
+			write('delivery node   ', jj); 
+			elif(jj = 0 or jj = 1) then
+				write('node            ',jj);
+	end-if
+	writeln('     in position  ' ,qq, ' with vehicle  ', kk);
+end-do
+
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+writeln;
+writeln('The total distance is ', sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek, kk in Vehicles) getsol(Flow(ii,jj,qq,kk))*DrivingDistanceVehicles(ii,jj,kk));
+
+
+
+writeln;
+
+forall(kk in Vehicles) do
+		write( (sum(ii in NodesVehiclek, jj in NodesVehiclek) (sum(dd in DeliveryNodes) getsol(WeightDestination(ii,jj,dd,kk))/WeightCap)) / (sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) getsol(Flow(ii,jj,qq,kk))-2)  );
+		writeln(' is the average capacity utilization for vehicle ', kk, ' when not empty.');
+end-do
+
+writeln;
+
+write('The average capacity utilization for the fleet of vehicles (when not empty) is: ', (sum(kk in Vehicles) (sum(ii in NodesVehiclek, jj in NodesVehiclek) (sum(dd in DeliveryNodes) getsol(WeightDestination(ii,jj,dd,kk))/WeightCap)) / (sum(ii in NodesVehiclek, jj in NodesVehiclek, qq in PositionsVehiclek) getsol(Flow(ii,jj,qq,kk))-2) / getsize(Vehicles)));
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+if not(sum(ii in NodesVehiclek, jj in NodesVehiclek,qq in PositionsVehiclek, kk in Vehicles) getsol(Flow(ii,jj,qq,kk)) = 0) then 
+	forall (ii in NodesVehiclek, kk in Vehicles | getsol(ServiceStart(ii,kk))>=0.01 and ii <> 1) do
+			write(strfmt(getsol(ServiceStart(ii,kk)),5), '   is start of service time at node   ', ii, '    with vehicle ', kk );
+			write('   and time windows: ', EarlyTimeWindow(ii), ' - ', LateTimeWindow(ii));
+			writeln(' ');
+	end-do
+	forall (ii in NodesVehiclek, kk in Vehicles | getsol(ServiceStart(ii,kk))>=0.01 and ii = 1) do
+			write(strfmt(getsol(ServiceStart(1,kk)),5), '   is start of service time at node   ', 1, '    with vehicle ', kk );
+			write('   and time windows: ', EarlyTimeWindow(1), ' - ', LateTimeWindow(1));
+			writeln(' ');
+	end-do
+end-if
+
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+forall (ii in NodesVehiclek, jj in NodesVehiclek, kk in Vehicles | getsol(TravelTimeVar (ii,jj,kk))>0.01 ) do
+	write(strfmt(getsol(TravelTimeVar (ii,jj,kk)),5), '	is the travel duration of the trip from node ');
+	writeln( ii, ' to node ', jj, ' with vehicle ', kk);
+end-do
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+
+
+writeln("The objective function value is ", strfmt(getobjval/1e0,0,3));
+
+writeln;
+writeln("-------------------------------------------------------------------------------------------------------------------");
+writeln;
+fclose(F_OUTPUT);
+
+
+
+end-model
+

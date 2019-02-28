@@ -1,0 +1,113 @@
+!Freight order 1  has pickup in  Hamar and delivery in  Dombås
+!Freight order 2  has pickup in  Røros and delivery in Oppdal
+!Freight order 3  has pickup in Oslo and delivery in Stjørdal
+!Freight order 4  has pickup in Gjøvik and delivery in  Hamar
+!Freight order 5  has pickup in  Dombås and delivery in Lillehammer
+!Vehicle 1 has startdepot  Trondheim
+!Vehicle 2 has startdepot  Ringebu
+!Vehicle 3 has startdepot  Hamar
+ 
+
+PickupNodes : [2   4   6   8  10]
+DeliveryNodes : [3   5   7   9  11]
+NodesVehiclek : [0   1   2   3   4   5   6   7   8   9  10  11]
+NodesWithoutStartDepot : [1   2   3   4   5   6   7   8   9  10  11]
+NodesWithoutEndDepot : [0   2   3   4   5   6   7   8   9  10  11]
+Nodes : [2   3   4   5   6   7   8   9  10  11]
+PositionsVehiclek : [1   2   3   4   5   6   7   8   9  10  11  12]
+nPositionsVehiclek : [12]
+VolumeCap : [81]
+WeightCap : [30]
+VolumeWeightConstant : [3.5]
+Vehicles : [ 1 ] 
+EarlyTimeWindow : [0            0           14           17           19           21            4        10.75           23           24           14           16]
+LateTimeWindow : [144           144            26            29            31            33            16         22.75            35            36            26            28]
+
+WeightLoad: [ 
+
+18     0     0     0     0     
+0     16     0     0     0     
+0     0     9     0     0     
+0     0     0     9     0     
+0     0     0     0     8     
+  ] 
+
+VolumeLoad: [ 
+
+44     0     0     0     0     
+0     37     0     0     0     
+0     0     14     0     0     
+0     0     0     22     0     
+0     0     0     0     22     
+  ] 
+
+DrivingTime: [ 
+
+0     0     0     0     0     0     0     0     0     0     0     0     
+0     0     0     0     0     0     0     0     0     0     0     0     
+0     0     0.5     3     3.75     4     1.75     5.5     1     0.5     3     1.25     
+0     0     3     0.5     2.5     1     4.25     3.25     2.5     3     0.5     2     
+0     0     3.75     2.5     0.5     2     4.75     2.5     4.25     3.75     2.5     3.75     
+0     0     4     1     2     0.5     5.25     2.25     3.5     4     1     3     
+0     0     1.75     4.15     4.75     5.25     0.5     6.75     1.75     1.75     4.15     2.5     
+0     0     5.5     3.25     2.5     2.25     6.75     0.5     5.75     5.5     3.25     5.25     
+0     0     1     2.5     4.25     3.5     1.75     5.75     0.5     1     2.5     0.75     
+0     0     0.5     3     3.75     4     1.75     5.5     1     0.5     3     1.25     
+0     0     3     0.5     2.5     1     4.25     3.25     2.5     3     0.5     2     
+0     0     1.25     2     3.75     3     2.5     5.25     0.75     1.25     2     0.5     
+  ] 
+
+DrivingDistance: [ 
+
+0     0     0     0     0     0     0     0     0     0     0     0     
+0     0     0     0     0     0     0     0     0     0     0     0     
+0     0     30     213     272     277     129     415     52     30     213     62     
+0     0     213     30     178     79     319     228     196     213     30     154     
+0     0     272     178     30     153     382     168     306     272     178     264     
+0     0     277     79     153     30     414     149     260     277     79     218     
+0     0     129     319     382     414     30     524     123     129     319     168     
+0     0     415     228     168     149     524     30     409     415     228     367     
+0     0     52     196     306     260     123     409     30     52     196     45     
+0     0     30     213     272     277     129     415     52     30     213     62     
+0     0     213     30     178     79     319     228     196     213     30     154     
+0     0     62     154     264     218     168     367     45     62     154     30     
+  ] 
+
+StartDepotTime : [  
+5.25     
+2.25     
+6.5     
+5.25     
+2.75     
+  ] 
+
+StartDepotDistance : [  
+384     
+154     
+495     
+378     
+198     
+  ] 
+
+MaxConsecutiveDrivingHours: [4.5] 
+ IntermediateBreakTime: [0.75] 
+MaxConsecutiveWorkingHours : [6] 
+MaxDailyDrivingHours : [9] 
+MinDailyRestingHours : [11] 
+HoursInDay: [24] 
+ MaxWeeklyDrivingHours : [56] 
+DrivingBigM1 : [79] 
+DrivingBigM2 : [11] 
+MaxWaitingTime : [0] 
+MaxBreakDuration: [11] 
+TimeBigM : [79] 
+
+
+FuelPrice : [14.84] 
+FuelConsumptionEmptyTruckPerKm : [0.42] 
+ FuelConsumptionPerTonPerKm : [0.01] 
+ LabourCostPerHour : [469] 
+OtherDistanceDependentCostsPerKm : [3.55] 
+OtherTimeDependentCostsPerHour : [199] 
+TimeTonService : [0.1] 
+Revenue : [100] 

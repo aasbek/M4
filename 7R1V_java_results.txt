@@ -1,16 +1,10 @@
-number of non-dominated paths: 112
-number of dominated labels: 69
+number of non-dominated paths: 14
+number of dominated labels: 4
 The best label is: 
-Node: 3, Time: 75.5, Profit: 769763.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [6, 10, 4, 8, 2], openNodes: [], dailyDrivingTime: 5.0, startTimeDailyRest: 49.0, numberDailyRests: 4, totalDistance: 1691
-Node: 2, Time: 71.55, Profit: 772930.56, WeightCapacityUsed: 17.0, VolumeCapacityUsed: 44.0, unreachablePickupNodes: [6, 10, 4, 8, 2], openNodes: [2], dailyDrivingTime: 2.75, startTimeDailyRest: 49.0, numberDailyRests: 4, totalDistance: 1542
-Node: 9, Time: 52.9, Profit: 533540.7, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [6, 10, 4, 8], openNodes: [], dailyDrivingTime: 6.0, startTimeDailyRest: 25.0, numberDailyRests: 3, totalDistance: 1133
-Node: 8, Time: 50.0, Profit: 535662.5, WeightCapacityUsed: 19.0, VolumeCapacityUsed: 48.0, unreachablePickupNodes: [6, 10, 4, 8], openNodes: [8], dailyDrivingTime: 5.0, startTimeDailyRest: 25.0, numberDailyRests: 3, totalDistance: 1081
-Node: 5, Time: 47.25, Profit: 439107.75, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [6, 10, 4], openNodes: [], dailyDrivingTime: 3.25, startTimeDailyRest: 25.0, numberDailyRests: 3, totalDistance: 966
-Node: 4, Time: 44.0, Profit: 441853.84, WeightCapacityUsed: 10.0, VolumeCapacityUsed: 29.0, unreachablePickupNodes: [6, 10, 4], openNodes: [4], dailyDrivingTime: 1.0, startTimeDailyRest: 25.0, numberDailyRests: 3, totalDistance: 804
-Node: 7, Time: 21.3, Profit: 295940.44, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [6, 10], openNodes: [], dailyDrivingTime: 6.5, startTimeDailyRest: 1.0, numberDailyRests: 2, totalDistance: 544
-Node: 11, Time: 18.65, Profit: 298147.28, WeightCapacityUsed: 10.0, VolumeCapacityUsed: 16.0, unreachablePickupNodes: [6, 10], openNodes: [6], dailyDrivingTime: 4.75, startTimeDailyRest: 1.0, numberDailyRests: 2, totalDistance: 421
-Node: 10, Time: 16.0, Profit: 300375.4, WeightCapacityUsed: 19.0, VolumeCapacityUsed: 39.0, unreachablePickupNodes: [6, 10], openNodes: [6, 10], dailyDrivingTime: 3.0, startTimeDailyRest: 1.0, numberDailyRests: 2, totalDistance: 292
-Node: 6, Time: 12.0, Profit: 187703.55, WeightCapacityUsed: 10.0, VolumeCapacityUsed: 16.0, unreachablePickupNodes: [6], openNodes: [6], dailyDrivingTime: 0.0, startTimeDailyRest: 1.0, numberDailyRests: 2, totalDistance: 79
+Node: 3, Time: 58.450005, Profit: 631422.06, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [], dailyDrivingTime: 5.15, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 1249
+Node: 2, Time: 52.800003, Profit: 639027.06, WeightCapacityUsed: 15.0, VolumeCapacityUsed: 32.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [2], dailyDrivingTime: 1.0, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 930
+Node: 9, Time: 34.15, Profit: 178111.45, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8], openNodes: [], dailyDrivingTime: 3.25, startTimeDailyRest: 13.0, numberDailyRests: 2, totalDistance: 406
+Node: 8, Time: 30.0, Profit: 183418.66, WeightCapacityUsed: 9.0, VolumeCapacityUsed: 19.0, unreachablePickupNodes: [8], openNodes: [8], dailyDrivingTime: 0.0, startTimeDailyRest: 13.0, numberDailyRests: 2, totalDistance: 178
 Node: 0, Time: 0.0, Profit: 0.0, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0, numberDailyRests: 1, totalDistance: 0
-Node: 1, Time: 77.2, Profit: 768627.4, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [6, 10, 4, 8, 2], openNodes: [], dailyDrivingTime: 5.0, startTimeDailyRest: 49.0, numberDailyRests: 4, totalDistance: 1691
-Took 73 milli seconds
+Node: 1, Time: 59.950005, Profit: 630420.06, WeightCapacityUsed: 0.0, VolumeCapacityUsed: 0.0, unreachablePickupNodes: [8, 2, 4, 6, 10], openNodes: [], dailyDrivingTime: 5.15, startTimeDailyRest: 37.0, numberDailyRests: 3, totalDistance: 1249
+Took 12 milli seconds
