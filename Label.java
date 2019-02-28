@@ -26,7 +26,7 @@ import java.util.Vector;
 
 	public String toString() {
 		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit +
-				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", totalDistance: " + totalDistance;
+				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", consecutiveDrivingTime: " + consecutiveDrivingTime + ", workingTime: " + workingTime + ", totalDistance: " + totalDistance;
 		
 		// ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
 		

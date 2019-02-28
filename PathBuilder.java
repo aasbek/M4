@@ -60,9 +60,10 @@ public class PathBuilder {
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService, node.earlyTimeWindow); 	
 		
 		//4,5 hour driving rule
-		if (consecutiveDrivingTime > 4.5 || workingTime > 6) {
+		if (consecutiveDrivingTime > 4.5) { // || workingTime > 6
 			return null;
 		}
+		
 		
 		// If the restrictions on daily driving time (9 hours) or the limit of 24 hours without a daily rest are not met, do not extend the label
 		if(dailyDrivingTime > 9 || arrivalTime >13 + 24*(numberDailyRests-1) ) {  //arrivalTime - 11 - startTimeDailyRest > 24
@@ -73,6 +74,9 @@ public class PathBuilder {
 			return null;
 		}
 		
+		if(arrivalTime - startTimeDailyRest > 24) {
+			return null;
+		}	
 		
 		// If the time is greater than the late time window of a node, return null
 		if(arrivalTime> node.lateTimeWindow){
@@ -310,7 +314,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime, node.earlyTimeWindow); 
 		float timeLeft = 9 - L.dailyDrivingTime;
 		float startTimeDailyRestDriving = Math.min(arrivalTime - dailyRestTime, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeft));
-		float dailyDrivingTimeDriving = 0;//arrivalTime - dailyRestTime - startTimeDailyRestDriving; //how long driven since last break
+		float dailyDrivingTimeDriving = arrivalTime - dailyRestTime - startTimeDailyRestDriving; //how long driven since last break
 		float loadingTimeLeft = 0;
 		
 		
@@ -682,12 +686,18 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 
 	float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + intermediateBreak, node.earlyTimeWindow); 
 	float timeLeft = maxDrivingTime - L.consecutiveDrivingTime;
+	//float timeLeftDriving
 	startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreak, arrivalTime - intermediateBreak - (inputdata.getTime(L.node, node) - timeLeft));
-	consecutiveDrivingTime = 0; //arrivalTime - intermediateBreak - startTimeIntermediateBreak; //how long driven since last break
-	workingTime = 0;
+	consecutiveDrivingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak; //how long driven since last break
+	//workingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak - L.node.weight*inputdata.timeTonService;
 	//float loadingTimeLeft = 0;
 	
 	int numberDailyRests = L.numberDailyRests;
+	
+	
+	if(arrivalTime - startTimeDailyRest > 24) {
+		return null;
+	}	
 	
 	
 	// If the restrictions on daily driving time (9 hours) or the limit of 24 hours without a daily rest are not met, do not extend the label
