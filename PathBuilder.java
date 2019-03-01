@@ -1167,7 +1167,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel = LabelExtension(nodes.get(1), label); // Adding node 1 (the end depot node) to the end of the path 
 			
 			if(newLabel!=null) {
-				System.out.println(newLabel.toString());
+			//	System.out.println(newLabel.toString());
 				if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 					list.add(newLabel);
 				}
@@ -1175,7 +1175,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(1), label);
 			
 			if(newLabel2!=null) {
-				System.out.println(newLabel2.toString());
+			//	System.out.println(newLabel2.toString());
 				if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
 					list.add(newLabel2);
 				}
@@ -1184,7 +1184,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
 			
 			if(newLabel3!=null) {
-				System.out.println(newLabel2.toString());
+			//	System.out.println(newLabel2.toString());
 				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
 					unprocessedQueue.add(newLabel3); 
 					unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
@@ -1211,11 +1211,11 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	
 	
 	private boolean dominateLabel(Label L1, Label L2) {
-<<<<<<< HEAD
+
 		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.workingTime <= L2.workingTime) { // 
-=======
-		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) { // && L1.workingTime <= L2.workingTime
->>>>>>> b6fec2a26f91e5d6b74af34a8901d59f5e796fa4
+
+	//	if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) { // && L1.workingTime <= L2.workingTime
+
 			for (int i : L1.openNodes ){
 				if (!L2.openNodes.contains(i)){
 					return false;
