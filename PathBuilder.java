@@ -60,7 +60,7 @@ public class PathBuilder {
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService, node.earlyTimeWindow); 	
 		
 		//4,5 hour driving rule
-		if (consecutiveDrivingTime > 4.5) { // || workingTime > 6
+		if (consecutiveDrivingTime > 4.5 || workingTime > 6) { // 
 			return null;
 		}
 		
@@ -74,9 +74,9 @@ public class PathBuilder {
 			return null;
 		}
 		
-		if(arrivalTime - startTimeDailyRest > 24) {
-			return null;
-		}	
+		//if(arrivalTime - startTimeDailyRest > 24) {
+		//	return null;
+		//}	
 		
 		// If the time is greater than the late time window of a node, return null
 		if(arrivalTime> node.lateTimeWindow){
@@ -299,10 +299,14 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float startTimeDailyRest = L.startTimeDailyRest;
 		float startTimeDailyRestDay = 0;
 		float dailyDrivingTimeDay = 0;
+		//float consecutiveDrivingTime = 0;
+		//float consecutiveWorkingTime = 0;
+		float dailyDrivingTimeDriving = 0;
 		//float timeLeftDailyRest = 0;
+		float maxDrivingTime = Float.parseFloat("4.5");
 		float consecutiveDrivingTime = L.consecutiveDrivingTime;
 		float startTimeIntermediateBreak = L.startTimeIntermediateBreak;
-		float workingTime = L.workingTime + inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService;
+		float consecutiveWorkingTime = L.workingTime + inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService;
 		
 		int totalDistance = L.totalDistance + inputdata.getDistance(L.node, node);
 		
@@ -312,11 +316,17 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		
 	
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime, node.earlyTimeWindow); 
-		float timeLeft = 9 - L.dailyDrivingTime;
-		float startTimeDailyRestDriving = Math.min(arrivalTime - dailyRestTime, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeft));
-		float dailyDrivingTimeDriving = arrivalTime - dailyRestTime - startTimeDailyRestDriving; //how long driven since last break
-		float loadingTimeLeft = 0;
+		float timeLeftDailyDriving = 9 - L.dailyDrivingTime;
+		float timeLeftDriving = maxDrivingTime - L.consecutiveDrivingTime;
+		float timeLeftWorking = 6 - L.workingTime;
+		float startTimeDailyRestDriving = Math.min(arrivalTime - dailyRestTime, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeftDailyDriving));
+		startTimeDailyRestDriving = Math.min(startTimeDailyRestDriving, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeftDriving));
+		startTimeDailyRestDriving = Math.min(startTimeDailyRestDriving, arrivalTime - dailyRestTime - (inputdata.getTime(L.node, node) - timeLeftWorking));
 		
+		
+		//float loadingTimeLeft = 0;
+		
+	
 		
 		int numberDailyRests = L.numberDailyRests;
 		//startTimeDailyRest = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
@@ -325,16 +335,21 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			startTimeDailyRestDay = arrivalTime - dailyRestTime;
 			dailyDrivingTimeDay = 0;
 			consecutiveDrivingTime = 0;
-			workingTime = 0;
+			consecutiveWorkingTime = 0;
 		} 
 		
-		else if(numberDailyRests == 1 && arrivalTime - dailyRestTime - startTimeDailyRest > 13 && arrivalTime - dailyRestTime - startTimeDailyRest < 24) {
+		else if(numberDailyRests == 1 && arrivalTime - dailyRestTime  > 13 ) { //arrivalTime - dailyRestTime - startTimeDailyRest < 24
 			startTimeDailyRestDay = 13;
+			dailyDrivingTimeDriving = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay); //how long driven since last break
+			consecutiveDrivingTime = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay); //how long driven since last break
+			consecutiveWorkingTime = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay);// - L.node.weight*inputdata.timeTonService;
+			
+			
 			//loadingTimeLeft =  L.node.weight*inputdata.timeTonService - startTimeDailyRestDay + L.time;
 			//if(loadingTimeLeft > 0) {
-				dailyDrivingTimeDay = 0; ///L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay - loadingTimeLeft;//Math.max(0, L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay);
-				consecutiveDrivingTime = 0;
-				workingTime = 0;
+			//	dailyDrivingTimeDay = 0; ///L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay - loadingTimeLeft;//Math.max(0, L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay);
+			//	consecutiveDrivingTime = 0;
+			//	consecutiveWorkingTime = 0;
 				//	}
 			//	else {
 				//	dailyDrivingTimeDay = L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay;
@@ -343,12 +358,16 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		}
 		
 		
-		if(numberDailyRests > 1 && arrivalTime - dailyRestTime - startTimeDailyRest <= 24) {
+		if(numberDailyRests > 1 && arrivalTime - dailyRestTime  <= 24 * (numberDailyRests -1) + 13)  {// arrivalTime - dailyRestTime - startTimeDailyRest <= 24) 
 			startTimeDailyRestDay = arrivalTime - dailyRestTime;
 			dailyDrivingTimeDay = 0;
 			consecutiveDrivingTime = 0;
-			workingTime = 0;
-		}
+			if(consecutiveWorkingTime + L.node.weight*inputdata.timeTonService > 6) {
+				startTimeDailyRestDay = arrivalTime - dailyRestTime - L.node.weight*inputdata.timeTonService - (inputdata.getTime(L.node, node) - timeLeftWorking);
+				System.out.println("heri");
+			}	
+			else {consecutiveWorkingTime = 0;
+		}}
 		
 		//if(arrivalTime <= 24 * numberDailyRests) {//(arrivalTime - dailyRestTime - startTimeDailyRest < 24) {
 			//startTimeDailyRestDay = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
@@ -357,13 +376,17 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			//System.out.println("1");
 		//}
 		
-		else if(numberDailyRests > 1 && arrivalTime - dailyRestTime - startTimeDailyRest > 24) {
+		else if(numberDailyRests > 1 && arrivalTime - dailyRestTime > 24 * (numberDailyRests -1) + 13) {
 			startTimeDailyRestDay = L.startTimeDailyRest + 24;
+			dailyDrivingTimeDriving = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay); //how long driven since last break
+			consecutiveDrivingTime = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay); //how long driven since last break
+			consecutiveWorkingTime = arrivalTime - dailyRestTime - Math.min(startTimeDailyRestDriving, startTimeDailyRestDay);// - L.node.weight*inputdata.timeTonService;
+			
 		//	loadingTimeLeft = L.node.weight*inputdata.timeTonService - startTimeDailyRestDay + L.time;
 		//	if(loadingTimeLeft > 0) {
-			dailyDrivingTimeDay = 0;//L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay - loadingTimeLeft;//Math.max(0, L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay);
-			consecutiveDrivingTime = 0;
-			workingTime = 0;
+			//dailyDrivingTimeDay = 0;//L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay - loadingTimeLeft;//Math.max(0, L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay);
+			//consecutiveDrivingTime = 0;
+			//workingTime = 0;
 			//	}
 		//	else {
 			//	dailyDrivingTimeDay = L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime - dailyRestTime - startTimeDailyRestDay;
@@ -388,6 +411,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float dailyDrivingTime = Math.max(dailyDrivingTimeDriving, dailyDrivingTimeDay);
 		//float dailyDrivingTime =dailyDrivingTimeDriving;
 		consecutiveDrivingTime = dailyDrivingTime; 
+		consecutiveWorkingTime = dailyDrivingTime + L.node.weight*inputdata.timeTonService;
 		
 		
 		
@@ -431,7 +455,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.totalDistance = totalDistance;
 			L2.consecutiveDrivingTime = consecutiveDrivingTime;
 			L2.startTimeIntermediateBreak = startTimeIntermediateBreak;
-			L2.workingTime = workingTime;
+			L2.workingTime = consecutiveWorkingTime;
 	//	
 			
 			L2.unreachablePickupNodes = new Vector<Integer>();
@@ -474,7 +498,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.totalDistance = totalDistance;
 			L2.consecutiveDrivingTime = consecutiveDrivingTime;
 			L2.startTimeIntermediateBreak = startTimeIntermediateBreak;
-			L2.workingTime = workingTime;
+			L2.workingTime = consecutiveWorkingTime;
 			
 	
 			
@@ -564,7 +588,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			L2.totalDistance = totalDistance;
 			L2.consecutiveDrivingTime = consecutiveDrivingTime;
 			L2.startTimeIntermediateBreak = startTimeIntermediateBreak;
-			L2.workingTime = workingTime;
+			L2.workingTime = consecutiveWorkingTime;
 			
 	//	
 			
@@ -667,10 +691,11 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	//float startTimeDailyRestDay = 0;
 	//float dailyDrivingTimeDay = 0;
 	float startTimeIntermediateBreak = L.startTimeIntermediateBreak ;
-	float consecutiveDrivingTime = L.consecutiveDrivingTime;
+	//float consecutiveDrivingTime = L.consecutiveDrivingTime;
 	float intermediateBreak = Float.parseFloat("0.75");
 	float maxDrivingTime = Float.parseFloat("4.5");
-	float workingTime = L.workingTime +  inputdata.getTime(L.node, node) + L.node.weight*inputdata.timeTonService ;
+	float maxWorkingTime = Float.parseFloat("6");
+	//float consecutiveWorkingTime = L.workingTime +  inputdata.getTime(L.node, node) + L.node.weight*inputdata.timeTonService ;
 	
 	
 
@@ -685,27 +710,32 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	
 
 	float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + intermediateBreak, node.earlyTimeWindow); 
-	float timeLeft = maxDrivingTime - L.consecutiveDrivingTime;
-	//float timeLeftDriving
-	startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreak, arrivalTime - intermediateBreak - (inputdata.getTime(L.node, node) - timeLeft));
-	consecutiveDrivingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak; //how long driven since last break
-	//workingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak - L.node.weight*inputdata.timeTonService;
+	float timeLeftDriving = maxDrivingTime - L.consecutiveDrivingTime;
+	float timeLeftWorking = maxWorkingTime - L.workingTime;
+	startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreak, arrivalTime - intermediateBreak - (inputdata.getTime(L.node, node) - timeLeftDriving));
+	startTimeIntermediateBreak = Math.min(startTimeIntermediateBreak, arrivalTime - intermediateBreak - (inputdata.getTime(L.node, node) - timeLeftWorking));
+	float consecutiveDrivingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak; //how long driven since last break
+	float consecutiveWorkingTime = arrivalTime - intermediateBreak - startTimeIntermediateBreak;// - L.node.weight*inputdata.timeTonService;
 	//float loadingTimeLeft = 0;
 	
 	int numberDailyRests = L.numberDailyRests;
 	
 	
-	if(arrivalTime - startTimeDailyRest > 24) {
-		return null;
-	}	
+	//if(arrivalTime - startTimeDailyRest > 24) {
+	//	return null;
+	//}	
 	
 	
 	// If the restrictions on daily driving time (9 hours) or the limit of 24 hours without a daily rest are not met, do not extend the label
-	if(dailyDrivingTime > 9 || arrivalTime-intermediateBreak >13 + 24*(numberDailyRests-1) ) {  //arrivalTime - 11 - startTimeDailyRest > 24
+	if(arrivalTime > 13 + 24*(numberDailyRests-1)) {  //arrivalTime - 11 - startTimeDailyRest > 24
 		return null;
 	}
-			
-	if(numberDailyRests == 1 && arrivalTime-intermediateBreak > 13) {
+	
+	if(dailyDrivingTime > 9) {
+		return null;
+	}
+			 
+	if(numberDailyRests == 1 && arrivalTime > 13) {
 		return null;
 	}
 	//startTimeDailyRest = arrivalTime - dailyRestTime; // - inputdata.getTime(L.node, node); //- L.node.weight*inputdata.timeTonService;
@@ -811,7 +841,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 		L2.totalDistance = totalDistance;
 		L2.consecutiveDrivingTime = consecutiveDrivingTime;
 		L2.startTimeIntermediateBreak = startTimeIntermediateBreak ;
-		L2.workingTime = workingTime;
+		L2.workingTime = consecutiveWorkingTime;
 //	
 		
 		L2.unreachablePickupNodes = new Vector<Integer>();
@@ -854,7 +884,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 		L2.totalDistance = totalDistance;
 		L2.consecutiveDrivingTime = consecutiveDrivingTime;
 		L2.startTimeIntermediateBreak = startTimeIntermediateBreak ;
-		L2.workingTime = workingTime;
+		L2.workingTime = consecutiveWorkingTime;
 		
 		
 
@@ -945,7 +975,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 		L2.totalDistance = totalDistance;
 		L2.consecutiveDrivingTime = consecutiveDrivingTime;
 		L2.startTimeIntermediateBreak = startTimeIntermediateBreak ;
-		L2.workingTime = workingTime;
+		L2.workingTime = consecutiveWorkingTime;
 //	
 		
 		L2.unreachablePickupNodes = new Vector<Integer>();
@@ -1137,7 +1167,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel = LabelExtension(nodes.get(1), label); // Adding node 1 (the end depot node) to the end of the path 
 			
 			if(newLabel!=null) {
-				//System.out.println(newLabel.toString());
+				System.out.println(newLabel.toString());
 				if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 					list.add(newLabel);
 				}
@@ -1145,7 +1175,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(1), label);
 			
 			if(newLabel2!=null) {
-			//	System.out.println(newLabel2.toString());
+				System.out.println(newLabel2.toString());
 				if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
 					list.add(newLabel2);
 				}
@@ -1154,7 +1184,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
 			
 			if(newLabel3!=null) {
-				//System.out.println(newLabel2.toString());
+				System.out.println(newLabel2.toString());
 				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
 					unprocessedQueue.add(newLabel3); 
 					unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
@@ -1181,7 +1211,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	
 	
 	private boolean dominateLabel(Label L1, Label L2) {
-		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.workingTime <= L2.workingTime) { //
+		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.workingTime <= L2.workingTime) { // 
 			for (int i : L1.openNodes ){
 				if (!L2.openNodes.contains(i)){
 					return false;
