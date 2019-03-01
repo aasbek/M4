@@ -1211,7 +1211,11 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	
 	
 	private boolean dominateLabel(Label L1, Label L2) {
+<<<<<<< HEAD
 		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.workingTime <= L2.workingTime) { // 
+=======
+		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) { // && L1.workingTime <= L2.workingTime
+>>>>>>> b6fec2a26f91e5d6b74af34a8901d59f5e796fa4
 			for (int i : L1.openNodes ){
 				if (!L2.openNodes.contains(i)){
 					return false;
