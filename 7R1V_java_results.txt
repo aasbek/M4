@@ -9,4 +9,4 @@ Node: 2, Time: 25.0, Profit: 365798.44, unreachablePickupNodes: [10, 8, 2], open
 Node: 10, Time: 17.0, Profit: 289737.47, unreachablePickupNodes: [10, 8], openNodes: [10], dailyDrivingTime: 0.0, startTimeDailyRest: 6.0, numberDailyRests: 2, StartTimeIntermediateBreak: 0.0, consecutiveDrivingTime: 0.0, workingTime: 0.0, totalDistance: 154
 Node: 0, Time: 0.0, Profit: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0, numberDailyRests: 1, StartTimeIntermediateBreak: 0.0, consecutiveDrivingTime: 0.0, workingTime: 0.0, totalDistance: 0
 Node: 1, Time: 48.2, Profit: 436901.03, unreachablePickupNodes: [10, 8, 2, 6], openNodes: [], dailyDrivingTime: 4.5, startTimeDailyRest: 30.0, numberDailyRests: 3, StartTimeIntermediateBreak: 24.25, consecutiveDrivingTime: 4.5, workingTime: 5.1000004, totalDistance: 915
-Took 43 milli seconds
+Took 39 milli seconds
