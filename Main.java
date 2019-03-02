@@ -11,7 +11,7 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 		long startTime = System.nanoTime();
 		
-		String datafile = "8T5R1V_java.txt";
+		String datafile = "4T5R1V_java.txt";
 		
 		File file = new File ("7R1V_java_results.txt");
 		
@@ -33,8 +33,8 @@ public class Main {
 
 		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes) ;
 
-		PathBuilder3 builder;
-		builder = new PathBuilder3(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw);
+		PathBuilder builder;
+		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw);
 		builder.BuildPaths();
 		//System.out.println(Node.getCorrespondingNode(nodes.get(2),nodes).number);
 		
