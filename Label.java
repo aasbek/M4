@@ -19,14 +19,14 @@ import java.util.Vector;
 		public float startTimeIntermediateBreak;
 		public Vector<Integer> openNodes; //pickupnodes
 		public int numberDailyRests;
-		public float workingTime;
+		public float consecutiveWorkingTime;
 	//	public float waitingTime;
 		public int totalDistance;
 		
 
 	public String toString() {
 		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit +
-				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", consecutiveDrivingTime: " + consecutiveDrivingTime + ", workingTime: " + workingTime + ", totalDistance: " + totalDistance;
+				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", consecutiveDrivingTime: " + consecutiveDrivingTime + ", workingTime: " + consecutiveWorkingTime + ", totalDistance: " + totalDistance;
 		
 		// ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 
 		
