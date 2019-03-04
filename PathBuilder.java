@@ -307,7 +307,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float maxDrivingTime = Float.parseFloat("4.5");
 		float consecutiveDrivingTime = L.consecutiveDrivingTime;
 		float startTimeIntermediateBreak = L.startTimeIntermediateBreak;
-		float consecutiveWorkingTime = L.consecutiveWorkingTime +L.node.weight*inputdata.timeTonService;
+		float consecutiveWorkingTime = L.consecutiveWorkingTime;
 		float dailyDrivingTime = L.dailyDrivingTime ;
 		
 		int totalDistance = L.totalDistance + inputdata.getDistance(L.node, node);
@@ -320,7 +320,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime, node.earlyTimeWindow); 
 		float arcDrivingTime = inputdata.getTime(L.node, node);
 		float arrivalTimeNoWait = L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime;
-		//float waitingTime = node.earlyTimeWindow - (L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime);
+		float waitingTime = node.earlyTimeWindow - (L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + dailyRestTime);
 		float timeLeftDailyDriving = 9 - L.dailyDrivingTime;
 		float timeLeftDriving = maxDrivingTime - L.consecutiveDrivingTime;
 		float timeLeftWorking = 6 - L.consecutiveWorkingTime; // - L.node.weight*inputdata.timeTonService;
@@ -328,9 +328,9 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		timeToBreak = Math.min(timeToBreak, timeLeftWorking);
 		startTimeDailyRest = L.time + L.node.weight*inputdata.timeTonService + timeToBreak;
 		consecutiveDrivingTime = arcDrivingTime - timeToBreak;
-		consecutiveWorkingTime = arcDrivingTime - timeToBreak;
+		consecutiveWorkingTime = arcDrivingTime - timeToBreak - L.node.weight*inputdata.timeTonService;
 		dailyDrivingTime = arcDrivingTime - timeToBreak;   
-		if (timeLeftWorking < 0) {
+		if (timeLeftWorking < 0) { 
 			startTimeDailyRest = L.time + timeLeftWorking;
 			consecutiveWorkingTime = arcDrivingTime + (L.node.weight*inputdata.timeTonService - timeLeftWorking);
 			consecutiveDrivingTime = arcDrivingTime;
@@ -341,6 +341,12 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			consecutiveWorkingTime = 0;
 			consecutiveDrivingTime = 0;
 			dailyDrivingTime = 0;
+		}
+		if (waitingTime > 0 && (timeLeftWorking < timeLeftDailyDriving || timeLeftDriving < timeLeftDailyDriving )) {
+			if (timeLeftWorking < timeLeftDailyDriving) {
+				
+			}
+			
 		}
 		
 		
@@ -368,7 +374,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 			dailyDrivingTime = arcDrivingTime - timeDriven; //how long driven since last break
 			consecutiveDrivingTime = arcDrivingTime - timeDriven; //how long driven since last break
 			consecutiveWorkingTime = 13 - L.time;// - L.node.weight*inputdata.timeTonService;
-			if (arrivalTimeNoWait < node.earlyTimeWindow) {
+			if (arrivalTimeNoWait < node.earlyTimeWindow) {  //denne må være feil!
 				dailyDrivingTime = 0;
 				consecutiveWorkingTime = 0;
 				consecutiveDrivingTime = 0;	
@@ -750,7 +756,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	float timeToBreak = Math.min(timeLeftDriving, timeLeftWorking);
 	startTimeIntermediateBreak = L.time  + L.node.weight*inputdata.timeTonService + timeToBreak;
 	float consecutiveDrivingTime = arcDrivingTime - timeToBreak;
-	float consecutiveWorkingTime = arcDrivingTime - timeToBreak; 
+	float consecutiveWorkingTime = arcDrivingTime - timeToBreak - L.node.weight*inputdata.timeTonService ; 
 	if (timeLeftWorking < 0) {
 		startTimeIntermediateBreak = L.time + timeLeftWorking;
 		consecutiveWorkingTime = arcDrivingTime + (L.node.weight*inputdata.timeTonService - timeLeftWorking);
