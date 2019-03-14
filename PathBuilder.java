@@ -674,6 +674,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	float timeLeftDriving = maxDrivingTime - L.consecutiveDrivingTime;
 	float timeLeftWorking = maxWorkingTime - L.consecutiveWorkingTime - L.node.weight*inputdata.timeTonService;
 	float timeLeftDailyDriving = 9 - L.dailyDrivingTime;
+	float waitingTime = node.earlyTimeWindow - (L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + intermediateBreakTime);
 	if(timeLeftDailyDriving < arcDrivingTime) {
 		return null;
 	}
@@ -714,9 +715,17 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 		return null;
 	}
 
-	
+	if (consecutiveDrivingTime > maxDrivingTime) {
+		return null;
+	}
 
-	
+	if (waitingTime > 1.5) { // adds a second intermediate break if waiting time is larger than 90 minutes
+		startTimeIntermediateBreak = arrivalTime - intermediateBreakTime;
+		consecutiveWorkingTime = 0;
+		consecutiveDrivingTime = 0;
+		arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + 2*intermediateBreakTime, node.earlyTimeWindow); 
+	}
+		
 	
 	// If the time is greater than the late time window of a node, return null
 	if(arrivalTime> node.lateTimeWindow){
@@ -993,6 +1002,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 	int totalDistance = L.totalDistance + inputdata.getDistance(L.node, node);
 	int numberDailyRests = L.numberDailyRests;
 	float remainingLoadingTime =0;
+	int extraBreak = 0;
 	
 	
 	float arrivalTime = Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + intermediateBreakTime, node.earlyTimeWindow); 
@@ -1005,13 +1015,17 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 	float timeLeftDailyDriving = (9 - L.dailyDrivingTime);
 	float timeToDailyRest = Math.min(timeTo24HourRule, timeLeftDailyDriving);
 	float timeToBreak = Math.min(timeLeftDriving, timeLeftWorking);
+	float drivingTimeToBreak = timeToBreak;
+	float workingTimeAfterIntermediateBreak = 0;
 	if (timeToBreak < timeToDailyRest - intermediateBreakTime) {   //intermediate break then daily rest
 		startTimeIntermediateBreak = L.time  + L.node.weight*inputdata.timeTonService + timeToBreak;	
 		if (timeLeftWorking < 0) {  //Break needed in the middle of loading time
 			startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime) ;//timeLeftWorking;
-			consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+			workingTimeAfterIntermediateBreak =  L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+			consecutiveWorkingTime = arcDrivingTime + workingTimeAfterIntermediateBreak;
 			consecutiveDrivingTime = arcDrivingTime;
 			dailyDrivingTime = arcDrivingTime + L.dailyDrivingTime; 
+			drivingTimeToBreak = 0;
 		}
 		if (startTimeIntermediateBreak >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //break taken on the end of the arc, no need for another break
 			return null;
@@ -1019,7 +1033,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 		if (waitingTime  <= 0 && arcDrivingTime - timeToBreak < maxDrivingTime) { //no waiting time and less than 4.5 hours to drive after break, no need for another break
 			return null;
 		}
-		startTimeDailyRest = Math.min(startTimeIntermediateBreak + intermediateBreakTime + timeLeftDailyDriving - timeToBreak,startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime);		
+		startTimeDailyRest = Math.min(startTimeIntermediateBreak + intermediateBreakTime + workingTimeAfterIntermediateBreak + timeLeftDailyDriving - drivingTimeToBreak, startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime);		
 		startTimeDailyRest = Math.min(13 + 24 * (numberDailyRests - 1), startTimeDailyRest); 
 		arrivalTime = Math.max(L.time + arcDrivingTime + L.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime, node.earlyTimeWindow);
 		float drivingTimeBetweenBreaks = startTimeDailyRest - startTimeIntermediateBreak - intermediateBreakTime;
@@ -1049,45 +1063,62 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 	else { // takes daily rest then intermediate break
 		arrivalTime = Math.max(L.time + arcDrivingTime + L.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime, node.earlyTimeWindow);
 		startTimeDailyRest = Math.min(L.time + L.node.weight*inputdata.timeTonService + timeLeftDailyDriving, 13 + 24 * (numberDailyRests -1));
+		float remainingDrivingTime = arcDrivingTime - timeToDailyRest;
+		dailyDrivingTime = arcDrivingTime - timeToDailyRest;
+		float drivingTimeBeforeDailyRest = timeToDailyRest;
 		if (timeTo24HourRule < 0 ) { //if the daily rest must be taken during loading
-		timeTo24HourRule = 13 + 24* (numberDailyRests -1) - L.time;
-		remainingLoadingTime = L.node.weight*inputdata.timeTonService - timeTo24HourRule;
+			timeTo24HourRule = 13 + 24* (numberDailyRests -1) - L.time;
+			remainingLoadingTime = L.node.weight*inputdata.timeTonService - timeTo24HourRule;
+			remainingDrivingTime = arcDrivingTime;
+			dailyDrivingTime = arcDrivingTime; 
+			drivingTimeBeforeDailyRest = 0;
 		} 
-		startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + maxDrivingTime - remainingLoadingTime, arrivalTime - intermediateBreakTime);
+		startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime - remainingLoadingTime, startTimeDailyRest + dailyRestTime + maxDrivingTime - remainingLoadingTime);
 		if (startTimeDailyRest >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //break taken on the end of the arc, no need for another break
 			return null;
 		}
 		if (waitingTime <= 0 && arcDrivingTime < timeLeftDailyDriving + maxDrivingTime ) { //no waiting time and less than 4.5 hours to drive after the break, no need for another break
 			return null;
 		}
-		float drivingTimeBetweenBreaks = startTimeIntermediateBreak - startTimeDailyRest - dailyRestTime;
-		dailyDrivingTime = arcDrivingTime - (startTimeDailyRest -  (L.time + L.node.weight*inputdata.timeTonService ));
-		float remainingDrivingTime = arcDrivingTime -  (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService ));
-		if (remainingDrivingTime < maxDrivingTime)
-			drivingTimeBetweenBreaks = remainingDrivingTime;
-			startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime - remainingLoadingTime, arrivalTime - intermediateBreakTime); 
-		}
-		consecutiveDrivingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService); 
-		consecutiveWorkingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest -  (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService);
-		if (startTimeIntermediateBreak == arrivalTime - intermediateBreakTime) {
+		if(remainingDrivingTime < maxDrivingTime ) {
 			consecutiveDrivingTime = 0;
 			consecutiveWorkingTime = 0;
+			//startTimeIntermediateBreak = arrivalTime - intermediateBreakTime;
 		}
-		if (dailyDrivingTime > 9 && waitingTime > 0 ) {
-			//fyll inn her
+		else {
+			consecutiveDrivingTime = arcDrivingTime - maxDrivingTime - drivingTimeBeforeDailyRest;
+			consecutiveWorkingTime = arcDrivingTime - maxDrivingTime - drivingTimeBeforeDailyRest;
 		}
+		//float drivingTimeBetweenBreaks = startTimeIntermediateBreak - startTimeDailyRest - dailyRestTime;
+		// float remainingDrivingTime = arcDrivingTime -  (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService ));
+		// drivingTimeBetweenBreaks = startTimeIntermediateBreak - dailyRestTime - startTimeDailyRest;
+		//if (remainingDrivingTime < maxDrivingTime)
+		//	drivingTimeBetweenBreaks = remainingDrivingTime;
+		//	startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime - remainingLoadingTime, arrivalTime - intermediateBreakTime); 
+		//}
+		// consecutiveDrivingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService); 
+		// consecutiveWorkingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest -  (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService);
+
+		// if (startTimeIntermediateBreak == arrivalTime - intermediateBreakTime) {
+		//	consecutiveDrivingTime = 0;
+		//	consecutiveWorkingTime = 0;
+		// }
+		//if (dailyDrivingTime > 9 && waitingTime > 0 ) {
+		//	//fyll inn her
+		//}
+		
 		if (dailyDrivingTime > 9) { //one intermediate break and two daily rests
 			startTimeDailyRest = startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime;
 			arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService +  intermediateBreakTime + 2 * dailyRestTime, node.earlyTimeWindow);
-			consecutiveDrivingTime = arcDrivingTime - drivingTimeBetweenBreaks - maxDrivingTime - timeLeftDailyDriving;
-			consecutiveWorkingTime = arcDrivingTime - drivingTimeBetweenBreaks -  maxDrivingTime - timeLeftDailyDriving;
-			dailyDrivingTime =  arcDrivingTime - drivingTimeBetweenBreaks -  maxDrivingTime - timeLeftDailyDriving;
-			L.numberDailyRests = L.numberDailyRests + 1;
+			consecutiveDrivingTime = arcDrivingTime - 2* maxDrivingTime - drivingTimeBeforeDailyRest;
+			consecutiveWorkingTime = arcDrivingTime - 2* maxDrivingTime - drivingTimeBeforeDailyRest;
+			dailyDrivingTime =  arcDrivingTime - 2* maxDrivingTime - drivingTimeBeforeDailyRest;
+			extraBreak = 1;
 		}
 	
+	}
+	numberDailyRests = L.numberDailyRests + 1 + extraBreak;
 	
-	numberDailyRests = L.numberDailyRests+1;
-
 	//if(arrivalTime - startTimeDailyRest > 24) {
 	//	return null;
 	//}	
