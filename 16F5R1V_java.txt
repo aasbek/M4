@@ -1,0 +1,52 @@
+NodesVehiclek , 0,1,2,3,4,5,6,7,8,9,10,11,
+VolumeCap , 81
+WeightCap , 30 
+EarlyTimeWindow ,0.00,0.00,7.00,8.75,12.00,13.00,12.00,12.75,20.00,22.75,19.00,21.25,
+LateTimeWindow , 144.00,144.00,15.00,24.75,20.00,29.00,20.00,28.75,28.00,38.75,27.00,37.25,
+WeightLoad , 4,8,13,16,2,
+VolumeLoad , 17,22,26,31,3,
+PickupNodes , 3,4,9,1,1,
+DeliveryNodes , 2,7,8,7,5,
+StartDepot , 7 
+EndDepot , 11 
+NumberOfCities, 11 
+Times: 
+0.5 , 6.5 , 5.25 , 1.75 , 2.25 , 5.25 , 2.75 , 4.75 , 4 , 0.5 , 0 , 
+6.5 , 0.5 , 1.75 , 5.25 , 4.75 , 1.75 , 4.15 , 2.5 , 3 , 6.75 , 0 , 
+5.25 , 1.75 , 0.5 , 4 , 3.75 , 1 , 3 , 1.15 , 1.75 , 5.5 , 0 , 
+1.75 , 5.25 , 4 , 0.5 , 2 , 3.5 , 1 , 3 , 2.25 , 2.25 , 0 , 
+2.25 , 4.75 , 3.75 , 2 , 0.5 , 4.25 , 2.5 , 3.75 , 3 , 2.5 , 0 , 
+5.25 , 1.75 , 1 , 3.5 , 4.25 , 0.5 , 2.5 , 0.75 , 1.25 , 5.75 , 0 , 
+2.75 , 4.25 , 3 , 1 , 2.5 , 2.5 , 0.5 , 2 , 1.25 , 3.25 , 0 , 
+4.75 , 2.5 , 1.25 , 3 , 3.75 , 0.75 , 2 , 0.5 , 0.75 , 5.25 , 0 , 
+4 , 3 , 1.75 , 2.25 , 3 , 1.25 , 1.25 , 0.75 , 0.5 , 4.5 , 0 , 
+0.5 , 6.75 , 5.5 , 2.25 , 2.5 , 5.75 , 3.25 , 5.25 , 4.5 , 0.5 , 0 , 
+0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 
+Distances: 
+30 , 495 , 384 , 119 , 154 , 378 , 198 , 336 , 280 , 36 , 0 , 
+495 , 30 , 129 , 414 , 382 , 123 , 319 , 168 , 221 , 524 , 0 , 
+384 , 129 , 30 , 277 , 272 , 52 , 213 , 62 , 115 , 415 , 0 , 
+119 , 414 , 277 , 30 , 153 , 260 , 79 , 218 , 162 , 149 , 0 , 
+154 , 382 , 272 , 153 , 30 , 306 , 178 , 264 , 208 , 168 , 0 , 
+378 , 123 , 52 , 260 , 306 , 30 , 196 , 45 , 98 , 409 , 0 , 
+198 , 319 , 213 , 79 , 178 , 196 , 30 , 154 , 98 , 228 , 0 , 
+336 , 168 , 62 , 218 , 264 , 45 , 154 , 30 , 57 , 367 , 0 , 
+280 , 221 , 115 , 162 , 208 , 98 , 98 , 57 , 30 , 311 , 0 , 
+36 , 524 , 415 , 149 , 168 , 409 , 228 , 367 , 311 , 30 , 0 , 
+0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 
+FuelPrice , 14.84 
+FuelConsumptionEmptyTruckPerKm, 0.42
+FuelConsumptionPerTonPerKm, 0.01
+ LabourCostPerHour, 469
+OtherDistanceDependentCostsPerKm, 3.55
+OtherTimeDependentCostsPerHour, 199
+TimeTonService, 0.1
+ Revenue, 100
+ 
+
+!Freight order 1  has pickup in  Hamar and delivery in Oslo
+!Freight order 2  has pickup in Oppdal and delivery in  Dombås
+!Freight order 3  has pickup in  Ringebu and delivery in Lillehammer
+!Freight order 4  has pickup in  Trondheim and delivery in  Dombås
+!Freight order 5  has pickup in  Trondheim and delivery in  Røros
+!The vehicle has startdepot  Dombås
