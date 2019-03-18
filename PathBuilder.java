@@ -331,7 +331,7 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		consecutiveDrivingTime = arcDrivingTime - timeToBreak;
 		consecutiveWorkingTime = arcDrivingTime - timeToBreak ;
 		dailyDrivingTime = arcDrivingTime - timeToBreak;   
-		if (timeLeftWorking < 0) {  // if daily rest must be started inside the loading time
+		if (timeLeftWorking <= 0) {  // if daily rest must be started inside the loading time
 			startTimeDailyRest = L.time + (6 - L.consecutiveWorkingTime);  // the time inside the loading time where the daily rest is started 
 			consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime); // the remaining loading time on the node plus the entire driving time on the arc
 			consecutiveDrivingTime = arcDrivingTime;
@@ -605,7 +605,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	startTimeIntermediateBreak = L.time  + L.node.weight*inputdata.timeTonService + timeToBreak;
 	float consecutiveDrivingTime = arcDrivingTime - timeToBreak;
 	float consecutiveWorkingTime = arcDrivingTime - timeToBreak; 
-	if (timeLeftWorking < 0) { // if startTimeIntermediate break is inside the working time
+	if (timeLeftWorking <= 0) { // if startTimeIntermediate break is inside the working time
 		startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime); 
 		consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
 		consecutiveDrivingTime = arcDrivingTime;
@@ -646,9 +646,13 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	if (consecutiveDrivingTime > maxDrivingTime) {
 		return null;
 	}
+	
+	if (consecutiveWorkingTime > maxWorkingTime) {
+		return null;
+	}
 
 	// If the time is greater than the late time window of a node, return null
-	if(arrivalTime> node.lateTimeWindow){
+	if(arrivalTime > node.lateTimeWindow){
 		return null;
 	}
 
@@ -695,6 +699,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 					- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 					- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time); 
+		System.out.println (L2.toString());  
 		return L2;
 	}
 	
@@ -823,8 +828,9 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 			}
 		}
 
-	
+		
 		return L2;
+		
 		
 	}
 
@@ -893,6 +899,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 		}
 		startTimeDailyRest = Math.min(startTimeIntermediateBreak + intermediateBreakTime + workingTimeAfterIntermediateBreak + timeLeftDailyDriving - drivingTimeBeforeFirstBreak, startTimeIntermediateBreak + intermediateBreakTime + workingTimeAfterIntermediateBreak + maxDrivingTime);		
 		startTimeDailyRest = Math.min(13 + 24 * (numberDailyRests - 1), startTimeDailyRest); 
+		startTimeDailyRest = Math.min(startTimeDailyRest, arrivalTime - dailyRestTime);
 		arrivalTime = Math.max(L.time + arcDrivingTime + L.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime, node.earlyTimeWindow);
 		float drivingTimeBetweenBreaks = startTimeDailyRest - startTimeIntermediateBreak - intermediateBreakTime;
 		consecutiveDrivingTime = arcDrivingTime - drivingTimeBeforeFirstBreak - drivingTimeBetweenBreaks;
@@ -926,6 +933,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			drivingTimeBeforeDailyRest = 0;
 		} 
 		startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime + remainingLoadingTime, startTimeDailyRest + dailyRestTime + maxDrivingTime + remainingLoadingTime);
+		startTimeIntermediateBreak = Math.min(startTimeIntermediateBreak, arrivalTime - intermediateBreakTime);
 		if (startTimeDailyRest >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //break taken on the end of the arc, no need for another break
 			return null;
 		}
@@ -1357,8 +1365,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			if(newLabel3!=null) {
 				//System.out.println(newLabel3.toString());
 				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
-					unprocessedQueue.add(newLabel3); 
-					unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
+					list.add(newLabel3);
 				}
 			}
 			
@@ -1367,8 +1374,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			if(newLabel4!=null) {
 				//System.out.println(newLabel3.toString());
 				if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
-					unprocessedQueue.add(newLabel4); 
-					unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
+					list.add(newLabel4);
 				}
 			}
 			
@@ -1392,6 +1398,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 		//System.out.println (i.toString());
 		//}
 		
+	
 		return list;
 	}
 	
