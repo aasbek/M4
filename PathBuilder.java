@@ -400,7 +400,10 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 				return null;
 			}
 		}
-
+		
+		if (consecutiveDrivingTime > maxDrivingTime || consecutiveWorkingTime > 6) {
+			return null;
+		}
 	
 		if(node.type == "Depot") {
 			if(!L.openNodes.isEmpty()){
@@ -699,7 +702,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 					- inputdata.fuelPrice*inputdata.fuelConsumptionPerTonKm*L.weightCapacityUsed*inputdata.getDistance(L.node,node)
 					- inputdata.otherDistanceDependentCostsPerKm * inputdata.getDistance(L.node, node)
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time); 
-		System.out.println (L2.toString());  
+		//System.out.println (L2.toString());  
 		return L2;
 	}
 	
@@ -891,7 +894,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			drivingTimeBeforeFirstBreak = 0;
 		}
 		timeLeftDailyDriving = timeLeftDailyDriving - drivingTimeBeforeFirstBreak;
-		if (startTimeIntermediateBreak >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //break taken on the end of the arc, no need for another break
+		if (startTimeIntermediateBreak >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //first break taken on the end of the arc, no need for another break
 			return null;
 		}
 		if (waitingTime  <= 0 && arcDrivingTime - drivingTimeBeforeFirstBreak < maxDrivingTime) { //no waiting time and less than 4.5 hours to drive after break, no need for another break
@@ -954,23 +957,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			consecutiveDrivingTime = maxWorkingTime - remainingLoadingTime - remainingDrivingTime;
 			consecutiveWorkingTime = maxWorkingTime - remainingLoadingTime - remainingDrivingTime;
 		}
-		//float drivingTimeBetweenBreaks = startTimeIntermediateBreak - startTimeDailyRest - dailyRestTime;
-		// float remainingDrivingTime = arcDrivingTime -  (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService ));
-		// drivingTimeBetweenBreaks = startTimeIntermediateBreak - dailyRestTime - startTimeDailyRest;
-		//if (remainingDrivingTime < maxDrivingTime)
-		//	drivingTimeBetweenBreaks = remainingDrivingTime;
-		//	startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime - remainingLoadingTime, arrivalTime - intermediateBreakTime); 
-		//}
-		// consecutiveDrivingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest- (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService); 
-		// consecutiveWorkingTime = arcDrivingTime -  drivingTimeBetweenBreaks - (startTimeDailyRest -  (L.time + L.node.weight*inputdata.timeTonService )); // Math.max(timeLeftDailyDriving, startTimeDailyRest - L.time -  L.node.weight*inputdata.timeTonService);
 
-		// if (startTimeIntermediateBreak == arrivalTime - intermediateBreakTime) {
-		//	consecutiveDrivingTime = 0;
-		//	consecutiveWorkingTime = 0;
-		// }
-		//if (dailyDrivingTime > 9 && waitingTime > 0 ) {
-		//	//fyll inn her
-		//}
 		
 		if (dailyDrivingTime > 9) { //one intermediate break and two daily rests
 			startTimeDailyRest = startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime;
@@ -1004,7 +991,10 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 	if(arrivalTime> node.lateTimeWindow){
 		return null;
 	}
-
+	
+	if (consecutiveDrivingTime > maxDrivingTime || consecutiveWorkingTime > 6) {
+		return null;
+	}
 	
 	for(int i : L.openNodes) {
 		if(arrivalTime-zeroTol > preprocess.unreachableDelNodesFromNode.get(node.number)[i+1]) {
@@ -1262,6 +1252,11 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 //				}
 //			}
 			for(Node pickup :pickupNodes) { // Going through all nodes except node 0 and node 1 (the depot nodes)
+				
+				float arcDrivingTime = inputdata.getTime(label.node,  pickup);
+				float dailyDrivingTime = label.dailyDrivingTime;
+				
+				if (arcDrivingTime + dailyDrivingTime <= 9){
 				Label newLabel = LabelExtension(pickup, label);
 				
 				if(newLabel!=null) {
@@ -1269,15 +1264,6 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 						unprocessedQueue.add(newLabel); 
 						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
-					}
-				}
-				Label newLabel2 = LabelExtensionWithDailyRest(pickup, label);
-				
-				if(newLabel2!=null) {
-			//		System.out.println(newLabel2.toString());
-					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
-						unprocessedQueue.add(newLabel2); 
-						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
 					}
 				}
 				
@@ -1290,19 +1276,49 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 						unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
 					}
 				}
+				}
+				Label newLabel2 = LabelExtensionWithDailyRest(pickup, label);
 				
-				Label newLabel4 = LabelExtensionWithTwoBreaks(pickup, label);
-				
-				if(newLabel4!=null) {
-				//	System.out.println(newLabel3.toString());
-					if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
-						unprocessedQueue.add(newLabel4); 
-						unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
+				if(newLabel2!=null) {
+			//		System.out.println(newLabel2.toString());
+					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
+						unprocessedQueue.add(newLabel2); 
+						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
 					}
 				}
 				
-			}
+
+				float intermediateBreakTime = Float.parseFloat("0.75");
+				float maxDrivingTime = Float.parseFloat("4.5");
+				int dailyRestTime = 9;
+				float waitingTime = pickup.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  pickup) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
+				
+				
+				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
+				Label newLabel4 = LabelExtensionWithTwoBreaks(pickup, label);
+				
+					if(newLabel4!=null) {
+				//		System.out.println(newLabel3.toString());
+						if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
+							unprocessedQueue.add(newLabel4); 
+							unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
+						}
+					}			
+				}
+			}	
+				
 			for(int i : label.openNodes) { // Going through all nodes except node 0 and node 1 (the depot nodes)
+
+				Node node = nodes.get(i+1); 
+				float arcDrivingTime = inputdata.getTime(label.node, node);
+				float intermediateBreakTime = Float.parseFloat("0.75");
+				float maxDrivingTime = Float.parseFloat("4.5");
+				int dailyRestTime = 9;
+				float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
+				float dailyDrivingTime = label.dailyDrivingTime;
+				
+				if (arcDrivingTime + dailyDrivingTime < 9) {
+				
 				Label newLabel = LabelExtension(nodes.get(i+1), label);
 				
 				if(newLabel!=null) {
@@ -1310,15 +1326,6 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
 						unprocessedQueue.add(newLabel); 
 						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
-					}
-				}
-				Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(i+1), label);
-				
-				if(newLabel2!=null) {
-					//System.out.println(newLabel2.toString());
-					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
-						unprocessedQueue.add(newLabel2); 
-						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
 					}
 				}
 				
@@ -1331,6 +1338,21 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 						unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
 					}
 				}
+				}
+				
+				Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(i+1), label);
+				
+				if(newLabel2!=null) {
+					//System.out.println(newLabel2.toString());
+					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
+						unprocessedQueue.add(newLabel2); 
+						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
+					}
+				}
+				
+
+				
+				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
 				
 				Label newLabel4 = LabelExtensionWithTwoBreaks(nodes.get(i+1), label);
 				
@@ -1341,8 +1363,14 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 						unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
 					}
 				}
-				
+				}
 			}
+			Node node = nodes.get(1);
+			float arcDrivingTime = inputdata.getTime(label.node, node);
+			float dailyDrivingTime = label.dailyDrivingTime;
+			
+			if (arcDrivingTime + dailyDrivingTime < 9) {
+			
 			Label newLabel = LabelExtension(nodes.get(1), label); // Adding node 1 (the end depot node) to the end of the path 
 			
 			if(newLabel!=null) {
@@ -1351,6 +1379,17 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 					list.add(newLabel);
 				}
 			}
+			Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
+			
+			if(newLabel3!=null) {
+				//System.out.println(newLabel3.toString());
+				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
+					list.add(newLabel3);
+				}
+			}
+			}
+			
+			
 			Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(1), label);
 			
 			if(newLabel2!=null) {
@@ -1360,14 +1399,15 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 				}
 			}
 			
-			Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
+
+	
+			float intermediateBreakTime = Float.parseFloat("0.75");
+			float maxDrivingTime = Float.parseFloat("4.5");
+			int dailyRestTime = 9;
+			float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
 			
-			if(newLabel3!=null) {
-				//System.out.println(newLabel3.toString());
-				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
-					list.add(newLabel3);
-				}
-			}
+			
+			if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
 			
 			Label newLabel4 = LabelExtensionWithTwoBreaks(nodes.get(1), label);
 			
@@ -1377,7 +1417,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 					list.add(newLabel4);
 				}
 			}
-			
+			}
 			
 			processedAtNode.get(label.node.number).add(label); // The label removed from unprocessed is added to processed
 		}
@@ -1403,27 +1443,45 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 	}
 	
 	
-	private boolean dominateLabel(Label L1, Label L2) {
+	private boolean dominateLabel(Label L1, Label L2) { //Checks if L1 dominates L2
+		if (L1.node.number != L2.node.number) {
+			return false;
+		}
+		if (L1.profit+zeroTol<L2.profit) {
+			return false;
+		}
+		if (L1.time-zeroTol>L2.time) {
+			return false;
+		}
 
-		if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) { // 
-
-	//	if(L1.time-zeroTol<=L2.time && L1.profit+zeroTol>=L2.profit && L1.node.number == L2.node.number && L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) { // && L1.workingTime <= L2.workingTime
-
-			for (int i : L1.openNodes ){
-				if (!L2.openNodes.contains(i)){
-					return false;
+		//if( L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) { 
+		
+		if( L1.startTimeDailyRest >= L2.startTimeDailyRest) {
+			
+			if ( L1.dailyDrivingTime <= L2.dailyDrivingTime ) {
+				
+				if ( L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime &&  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
+			
+					if (L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) {
+		
+		
+						for (int i : L1.openNodes ){
+							if (!L2.openNodes.contains(i)){
+							return false;
+							}
+						}
+						for (int i : L1.unreachablePickupNodes ){
+							if (!L2.unreachablePickupNodes.contains(i)){
+							return false;
+							}	
+						}
+					return true;	
+					}
+					else return false; 	
 				}
+				else return false; 	
 			}
-			for (int i : L1.unreachablePickupNodes ){
-				if (!L2.unreachablePickupNodes.contains(i)){
-					return false;
-				}
-			}
-			//System.out.println("Label: ");
-			//System.out.println(L1.toString());
-			//System.out.println("dominates label: ");
-			//System.out.println(L2.toString());
-			return true;
+			else return false; 	
 		}
 		else return false; 
 	}
