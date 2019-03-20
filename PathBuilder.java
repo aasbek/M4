@@ -1460,23 +1460,30 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) {
 			
 			if ( L1.dailyDrivingTime <= L2.dailyDrivingTime ) {
 				
-				if ( L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime &&  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
+				if ( L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) {
+					
+					
+					if(  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
+				
 			
-					if (L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) {
+						if (L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) {
 		
 		
-						for (int i : L1.openNodes ){
-							if (!L2.openNodes.contains(i)){
-							return false;
+							for (int i : L1.openNodes ){
+								if (!L2.openNodes.contains(i)){
+									return false;
+								}
 							}
+							for (int i : L1.unreachablePickupNodes ){
+								if (!L2.unreachablePickupNodes.contains(i)){
+									return false;
+								}	
+							}
+							return true;	
 						}
-						for (int i : L1.unreachablePickupNodes ){
-							if (!L2.unreachablePickupNodes.contains(i)){
-							return false;
-							}	
-						}
-					return true;	
-					}
+						else return false;
+						
+					}		
 					else return false; 	
 				}
 				else return false; 	
