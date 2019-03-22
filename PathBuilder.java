@@ -905,6 +905,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) { //intermediate br
 		startTimeDailyRest = Math.min(startTimeIntermediateBreak + intermediateBreakTime + workingTimeAfterIntermediateBreak + timeLeftDailyDriving - drivingTimeBeforeFirstBreak, startTimeIntermediateBreak + intermediateBreakTime + workingTimeAfterIntermediateBreak + maxDrivingTime);		
 		startTimeDailyRest = Math.min(13 + 24 * (numberDailyRests - 1), startTimeDailyRest); 
 		startTimeDailyRest = Math.min(startTimeDailyRest, arrivalTime - dailyRestTime);
+		startTimeDailyRest = Math.min(startTimeDailyRest, startTimeIntermediateBreak + intermediateBreakTime + maxWorkingTime);
 		arrivalTime = Math.max(L.time + arcDrivingTime + L.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime, node.earlyTimeWindow);
 		float drivingTimeBetweenBreaks = startTimeDailyRest - startTimeIntermediateBreak - intermediateBreakTime;
 		consecutiveDrivingTime = arcDrivingTime - drivingTimeBeforeFirstBreak - drivingTimeBetweenBreaks;
@@ -1204,7 +1205,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) { //intermediate br
 
 
 
-public Label LabelExtensionWithTwoBreaks2(Node node, Label L) {
+public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest before intermediate break
 
 	
 	// Cannot return to start depot
