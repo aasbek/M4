@@ -919,7 +919,7 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) { //intermediate br
 //		}
 		if (consecutiveDrivingTime > maxDrivingTime) { //in the case where three breaks are needed, 2 intermediate breaks and 1 daily rest (intermediate break - daily rest - intermediate break)
 			arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + 2 * intermediateBreakTime + dailyRestTime, node.earlyTimeWindow);
-			startTimeIntermediateBreak = startTimeDailyRest + maxDrivingTime;
+			startTimeIntermediateBreak = startTimeDailyRest + maxDrivingTime + dailyRestTime;
 			consecutiveDrivingTime = arcDrivingTime - drivingTimeBetweenBreaks - maxDrivingTime - drivingTimeBeforeFirstBreak;
 			consecutiveWorkingTime = arcDrivingTime - drivingTimeBetweenBreaks -  maxDrivingTime - drivingTimeBeforeFirstBreak;
 			dailyDrivingTime =  arcDrivingTime -  drivingTimeBetweenBreaks - drivingTimeBeforeFirstBreak;
