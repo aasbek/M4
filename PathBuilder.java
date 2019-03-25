@@ -332,10 +332,11 @@ public Label LabelExtensionWithDailyRest(Node node, Label L) {
 		consecutiveWorkingTime = arcDrivingTime - timeToBreak ;
 		dailyDrivingTime = arcDrivingTime - timeToBreak;   
 		if (timeLeftWorking <= 0) {  // if daily rest must be started inside the loading time
-			startTimeDailyRest = L.time + (6 - L.consecutiveWorkingTime);  // the time inside the loading time where the daily rest is started 
-			consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime); // the remaining loading time on the node plus the entire driving time on the arc
-			consecutiveDrivingTime = arcDrivingTime;
-			dailyDrivingTime = arcDrivingTime; 
+		//	startTimeDailyRest = L.time + (6 - L.consecutiveWorkingTime);  // the time inside the loading time where the daily rest is started 
+		//	consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime); // the remaining loading time on the node plus the entire driving time on the arc
+		//	consecutiveDrivingTime = arcDrivingTime;
+		//	dailyDrivingTime = arcDrivingTime; 
+			return null;
 		}
 		
 		if (startTimeDailyRest > L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { // if no daily rest is needed, place the daily rest at the end of the arc
@@ -612,12 +613,13 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	float consecutiveDrivingTime = arcDrivingTime - timeToBreak;
 	float consecutiveWorkingTime = arcDrivingTime - timeToBreak; 
 	if (timeLeftWorking <= 0) { // if startTimeIntermediate break is inside the working time
-		startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime); 
-		remainingLoadingTime = L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
-		consecutiveWorkingTime = arcDrivingTime + remainingLoadingTime;
-		consecutiveDrivingTime = arcDrivingTime;
-		dailyDrivingTime = arcDrivingTime + L.dailyDrivingTime; 
-		timeDrivenBeforeFirstBreak = 0; // if break is taken inside working time, no driving has been done
+		//startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime); 
+		//remainingLoadingTime = L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+		//consecutiveWorkingTime = arcDrivingTime + remainingLoadingTime;
+		//consecutiveDrivingTime = arcDrivingTime;
+		//dailyDrivingTime = arcDrivingTime + L.dailyDrivingTime; 
+		//timeDrivenBeforeFirstBreak = 0; // if break is taken inside working time, no driving has been done
+		return null;
 	}
 	if (startTimeIntermediateBreak > L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { // if no intermediate break is necessary, put the break at the end of the arc
 		startTimeIntermediateBreak = arrivalTime - intermediateBreakTime;
@@ -897,12 +899,13 @@ public Label LabelExtensionWithTwoBreaks(Node node, Label L) { //intermediate br
 	if (timeToBreak < timeToDailyRest - intermediateBreakTime) {   //intermediate break before daily rest
 		startTimeIntermediateBreak = L.time  + L.node.weight*inputdata.timeTonService + timeToBreak;	
 		if (timeLeftWorking < 0) {  //Break needed in the middle of loading time
-			startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime) ;//timeLeftWorking;
-			workingTimeAfterIntermediateBreak =  L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+			//startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime) ;//timeLeftWorking;
+			//workingTimeAfterIntermediateBreak =  L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
 			//consecutiveWorkingTime = arcDrivingTime + workingTimeAfterIntermediateBreak;
 			//consecutiveDrivingTime = arcDrivingTime;
 			//dailyDrivingTime = arcDrivingTime + L.dailyDrivingTime; 
-			drivingTimeBeforeFirstBreak = 0;
+			//drivingTimeBeforeFirstBreak = 0;
+			return null;
 		}
 		timeLeftDailyDriving = timeLeftDailyDriving - drivingTimeBeforeFirstBreak;
 		if (startTimeIntermediateBreak >= L.time + (L.node.weight*inputdata.timeTonService) + arcDrivingTime) { //first break taken on the end of the arc, no need for another break
@@ -1312,11 +1315,12 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 			drivingTimeBeforeDailyRest = 0;
 		} 
 		if (timeLeftWorking < 0 && timeLeftWorking < timeTo24HourRule) {  // if daily rest must be started inside the loading time
-			startTimeDailyRest = L.time + (6 - L.consecutiveWorkingTime);  // the time inside the loading time where the daily rest is started 
-			remainingLoadingTime = L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
-			remainingDrivingTime = arcDrivingTime;
-			dailyDrivingTime = arcDrivingTime; 
-			drivingTimeBeforeDailyRest = 0;
+		//	startTimeDailyRest = L.time + (6 - L.consecutiveWorkingTime);  // the time inside the loading time where the daily rest is started 
+		//	remainingLoadingTime = L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+		//	remainingDrivingTime = arcDrivingTime;
+		//	dailyDrivingTime = arcDrivingTime; 
+		//	drivingTimeBeforeDailyRest = 0;
+			return null;
 		}
 		startTimeIntermediateBreak = Math.min(startTimeDailyRest + dailyRestTime + remainingDrivingTime + remainingLoadingTime, startTimeDailyRest + dailyRestTime + maxDrivingTime + remainingLoadingTime);
 		startTimeIntermediateBreak = Math.min(startTimeIntermediateBreak, arrivalTime - intermediateBreakTime);
@@ -1882,7 +1886,7 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 				if ( L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) {
 					
 					
-					if(  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
+			//		if(  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
 				
 			
 						if (L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) {
@@ -1900,9 +1904,9 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 							}
 							return true;	
 						}
-						else return false;
+						//else return false;
 						
-					}		
+					//}		
 					else return false; 	
 				}
 				else return false; 	
