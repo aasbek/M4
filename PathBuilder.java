@@ -602,6 +602,7 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	float timeLeftDriving = maxDrivingTime - L.consecutiveDrivingTime;
 	float timeLeftWorking = maxWorkingTime - L.consecutiveWorkingTime - L.node.weight*inputdata.timeTonService;
 	float timeLeftDailyDriving = 9 - L.dailyDrivingTime;
+	float remainingLoadingTime = 0;
 	if(timeLeftDailyDriving < arcDrivingTime) {
 		return null; // cannot extend with intermediate break if a daily rest is necessary 
 	}
@@ -612,7 +613,8 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 	float consecutiveWorkingTime = arcDrivingTime - timeToBreak; 
 	if (timeLeftWorking <= 0) { // if startTimeIntermediate break is inside the working time
 		startTimeIntermediateBreak = L.time + (6 - L.consecutiveWorkingTime); 
-		consecutiveWorkingTime = arcDrivingTime + L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+		remainingLoadingTime = L.node.weight*inputdata.timeTonService - (6 - L.consecutiveWorkingTime);
+		consecutiveWorkingTime = arcDrivingTime + remainingLoadingTime;
 		consecutiveDrivingTime = arcDrivingTime;
 		dailyDrivingTime = arcDrivingTime + L.dailyDrivingTime; 
 		timeDrivenBeforeFirstBreak = 0; // if break is taken inside working time, no driving has been done
@@ -636,15 +638,22 @@ public Label LabelExtensionWithIntermediateBreak(Node node, Label L) {
 		return null;
 	}
 	
-	if (waitingTime > 1.5) { // adds a second intermediate break at the end of the arc if waiting time is larger than 90 minutes
-		startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreakTime, startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime);
+	if (waitingTime > 1.5 || consecutiveDrivingTime > maxDrivingTime || consecutiveWorkingTime > maxWorkingTime ) { // adds a second intermediate break at the end of the arc if waiting time is larger than 90 minutes
+		arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + 2*intermediateBreakTime, node.earlyTimeWindow); 
+		float timeToSecondBreak = Math.min(maxWorkingTime - remainingLoadingTime,  maxDrivingTime);
+		float drivingTimeBetweenBreaks = Math.min(maxDrivingTime, maxWorkingTime - remainingLoadingTime);
+		startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreakTime, startTimeIntermediateBreak + intermediateBreakTime + timeToSecondBreak);
+		if (consecutiveDrivingTime > maxDrivingTime) {
+			startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreakTime, startTimeIntermediateBreak + intermediateBreakTime + maxDrivingTime + remainingLoadingTime);
+		}
+		
 		consecutiveWorkingTime = 0;
 		consecutiveDrivingTime = 0;
 		if(startTimeIntermediateBreak < arrivalTime - intermediateBreakTime) { // if the second intermediate break must be taken before the end of the arc 
 			consecutiveWorkingTime = arcDrivingTime - maxDrivingTime - timeDrivenBeforeFirstBreak; // working time (only driving) left after both breaks
 			consecutiveDrivingTime = arcDrivingTime - maxDrivingTime - timeDrivenBeforeFirstBreak; // driving time left after both breaks
 		}
-		arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + 2*intermediateBreakTime, node.earlyTimeWindow); 
+		
 	}
 	
 	

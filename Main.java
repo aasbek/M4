@@ -13,7 +13,7 @@ public class Main {
 		
 		String datafile = "3T30R1V_java.txt";
 		
-		File file = new File ("7R1V_java_results.txt");
+		File file = new File ("3T30R1V_java_results.txt");
 		
 		if (!file.exists()) {
 			try { file.createNewFile(); 
