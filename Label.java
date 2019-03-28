@@ -21,11 +21,11 @@ import java.util.Vector;
 		public int numberDailyRests;
 		public float consecutiveWorkingTime;
 	//	public float waitingTime;
-		public int totalDistance;
+		public float totalDistance;
 		
 
 	public String toString() {
-		String string = "Node: " + node.number+ ", Time: " + time+", Profit: "+ profit +
+		String string = "Node: " + node.number + ", Location: " + node.location + " , " + node.locationName + ", Time: " + time + ", Profit: "+ profit +
 				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", consecutiveDrivingTime: " + consecutiveDrivingTime + ", workingTime: " + consecutiveWorkingTime + ", totalDistance: " + totalDistance;
 		
 		// ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 

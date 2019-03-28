@@ -20,27 +20,159 @@ public class Node {
 	public void getLocation(int location){
 	
 		switch(location) {
-		case 1: locationName = "Trondheim";
-		break;
-		case 2: locationName = "Oslo";
-		break;
-		case 3: locationName = "Hamar";
-		break;
-		case 4: locationName = "Oppdal";
-		break;
-		case 5: locationName = "RÃ¸ros";
-		break; 
-		case 6: locationName = "GjÃ¸vik";
-		break;
-		case 7: locationName = "DombÃ¥s";
-		break;
-		case 8: locationName = "Lillehammer";
-		break;
-		case 9: locationName = "Ringebu";
-		break;
-		case 10: locationName = "Stjørdal";
-		break;
-		case 11: locationName = "End";
+	case 1:
+       locationName= " Fredrikstad";
+       break;
+   case 2:
+       locationName= "Røros";
+       break;
+   case 3:
+       locationName= " Steinkjer";
+       break;
+   case 4:
+       locationName= "Beitostølen";
+       break;
+   case 5:
+       locationName= " Drammen";
+       break;
+   case 6:
+       locationName= "Tønsberg";
+       break;
+   case 7:
+       locationName= " Kongsvinger";
+       break;
+   case 8:
+       locationName= "Elverum";
+       break;
+   case 9:
+       locationName= " Alvdal";
+       break;
+   case 10:
+       locationName= "Hjerkinn";
+       break;
+   case 11:
+       locationName= " Meldal";
+       break;
+   case 12:
+       locationName= "Meråker";
+       break;
+   case 13:
+       locationName= " Hassdalen";
+       break;
+   case 14:
+       locationName= "Krokstadøra";
+       break;
+   case 15:
+       locationName= "Sistranda";
+       break;
+   case 16:
+       locationName= "Vinstra";
+       break;
+   case 17:
+       locationName= " Kongsberg";
+       break;
+   case 18:
+       locationName= "Nesbyen";
+       break;
+   case 19:
+       locationName= " Trondheim";
+       break;
+   case 20:
+       locationName= "Orkanger";
+       break;
+   case 21:
+       locationName= " Tanem";
+       break;
+   case 22:
+       locationName= "Meldal";
+       break;
+   case 23:
+       locationName= " Vinjeøra";
+       break;
+   case 24:
+       locationName= "Berkåk";
+       break;
+   case 25:
+       locationName= " Oppdal";
+       break;
+   case 26:
+       locationName= "Tynset";
+       break;
+   case 27:
+       locationName= " Rennebu";
+       break;
+   case 28:
+       locationName= "Dombås";
+       break;
+   case 29:
+       locationName= " Elverum";
+       break;
+   case 30:
+       locationName= "Åndalsnes";
+       break;
+   case 31:
+       locationName= " Lillehammer";
+       break;
+   case 32:
+       locationName= "Hamar";
+       break;
+   case 33:
+       locationName= " Oslo";
+       break;
+   case 34:
+       locationName= "Fagernes";
+       break;
+   case 35:
+       locationName= " Lillestrøm";
+       break;
+   case 36:
+       locationName= "Haltdalen";
+       break;
+   case 37:
+       locationName= " Stjørdal";
+       break;
+   case 38:
+       locationName= "Grimsbu";
+       break;
+   case 39:
+       locationName= " Koppang";
+       break;
+   case 40:
+       locationName= "Brandbu";
+       break;
+   case 41:
+       locationName= " Raufoss";
+       break;
+   case 42:
+       locationName= "Geiranger";
+       break;
+   case 43:
+       locationName= " Flisa";
+       break;
+   case 44:
+       locationName= "Skåbu";
+       break;
+   case 45:
+       locationName= " Fossbergom";
+       break;
+   case 46:
+       locationName= "Molde";
+       break;
+   case 47:
+       locationName= " Kristiansund";
+       break;
+   case 48:
+       locationName= "Hammarvika";
+       break;
+   case 49:
+       locationName= " Porsgrunn";
+       break;
+   case 50:
+       locationName= "Ålesund";
+       break;
+   case 51:
+	   locationName = "EndDepot";
+	   break;
 		}
 	}
 	

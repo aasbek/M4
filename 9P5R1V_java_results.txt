@@ -1,0 +1,12 @@
+number of non-dominated paths: 64
+number of dominated labels: 48
+The best label is: 
+Node: 3, Location: 23 ,  Vinjeøra, Time: 96.65, Profit: 824210.06, unreachablePickupNodes: [4, 8, 6, 2, 10], openNodes: [], dailyDrivingTime: 4.599999, startTimeDailyRest: 58.000004, numberDailyRests: 5, StartTimeIntermediateBreak: 95.8, consecutiveDrivingTime: 0.09999895, workingTime: 0.09999895, totalDistance: 1899.074
+Node: 2, Location: 44 , Skåbu, Time: 90.0, Profit: 832312.25, unreachablePickupNodes: [4, 8, 6, 2, 10], openNodes: [2], dailyDrivingTime: -9.536743E-7, startTimeDailyRest: 58.000004, numberDailyRests: 5, StartTimeIntermediateBreak: 53.800003, consecutiveDrivingTime: -9.536743E-7, workingTime: -9.536743E-7, totalDistance: 1586.569
+Node: 7, Location: 17 ,  Kongsberg, Time: 52.350002, Profit: 454153.72, unreachablePickupNodes: [4, 8, 6], openNodes: [], dailyDrivingTime: 3.4499998, startTimeDailyRest: 37.9, numberDailyRests: 4, StartTimeIntermediateBreak: 19.18, consecutiveDrivingTime: 3.4499998, workingTime: 3.4499998, totalDistance: 1285.24
+Node: 6, Location: 14 , Krokstadøra, Time: 33.0, Profit: 473190.78, unreachablePickupNodes: [4, 8, 6], openNodes: [6], dailyDrivingTime: 0.0, startTimeDailyRest: 22.0, numberDailyRests: 3, StartTimeIntermediateBreak: 19.18, consecutiveDrivingTime: 0.0, workingTime: 0.0, totalDistance: 696.28296
+Node: 5, Location: 37 ,  Stjørdal, Time: 20.630001, Profit: 246898.62, unreachablePickupNodes: [4, 8], openNodes: [], dailyDrivingTime: 5.2, startTimeDailyRest: 2.9799995, numberDailyRests: 2, StartTimeIntermediateBreak: 19.18, consecutiveDrivingTime: 0.6999998, workingTime: 0.6999998, totalDistance: 591.253
+Node: 4, Location: 31 ,  Lillehammer, Time: 13.98, Profit: 255466.33, unreachablePickupNodes: [4, 8], openNodes: [4], dailyDrivingTime: 0.0, startTimeDailyRest: 2.9799995, numberDailyRests: 2, StartTimeIntermediateBreak: 0.0, consecutiveDrivingTime: 0.0, workingTime: 0.0, totalDistance: 210.025
+Node: 0, Location: 26 , Tynset, Time: 0.0, Profit: 0.0, unreachablePickupNodes: [], openNodes: [], dailyDrivingTime: 0.0, startTimeDailyRest: 0.0, numberDailyRests: 1, StartTimeIntermediateBreak: 0.0, consecutiveDrivingTime: 0.0, workingTime: 0.0, totalDistance: 0.0
+Node: 1, Location: 51 , EndDepot, Time: 97.950005, Profit: 823341.7, unreachablePickupNodes: [4, 8, 6, 2, 10], openNodes: [], dailyDrivingTime: 4.599999, startTimeDailyRest: 58.000004, numberDailyRests: 5, StartTimeIntermediateBreak: 95.8, consecutiveDrivingTime: 0.09999895, workingTime: 1.399999, totalDistance: 1899.074
+Took 80 milli seconds

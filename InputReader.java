@@ -136,7 +136,7 @@ public class InputReader {
 			inputdata.numberOfCities = Integer.parseInt(list1[1].trim());
 			
 			inputdata.times = new float[inputdata.numberOfCities][inputdata.numberOfCities];
-			inputdata.distances = new int[inputdata.numberOfCities][inputdata.numberOfCities];
+			inputdata.distances = new float[inputdata.numberOfCities][inputdata.numberOfCities];
 			
 			fr.readLine();
 			
@@ -156,7 +156,7 @@ public class InputReader {
 				line = fr.readLine();
 				for(int j = 0; j < inputdata.numberOfCities; j++){
 				list1 = line.split(",");
-				inputdata.distances[i][j] = Integer.parseInt(list1[j].trim());
+				inputdata.distances[i][j] = Float.parseFloat(list1[j].trim());
 				}
 			}
 			//System.out.println(inputdata.distances[0][1]);
