@@ -16,6 +16,7 @@ public class PathBuilder {
 	private double zeroTol = 0.001;
 	private int numberOfDominatedLabels;
 	public Preprocessing preprocess;
+	int numRoutes = 0;
 	
 	
 	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw) {
@@ -2188,6 +2189,8 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 	
 	public Label findBestLabel(Vector<Label> list) throws NullPointerException {
 		float currentBestProfit = 0;
+		Route route = new Route();
+		route.path = new Vector<Node>();
 		Label bestLabel = null;
 		for(Label i : list) {
 			if(i.profit > currentBestProfit) {
@@ -2201,15 +2204,20 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 			throw new NullPointerException ("No feasible solution");	
 		}
 		
+		route.profit = bestLabel.profit;
+		int i = 0;
+		
+		
 		Label temp = bestLabel.predesessor;
 		while(temp!=null) {
 			System.out.println(temp.toString());
 			pw.println(temp.toString());
+			route.path.add(temp.node);
+			i++;
 		temp=temp.predesessor;
 		} 
 		pw.println(bestLabel.toString());
-
-		
+		numRoutes = numRoutes +1;
 		return bestLabel;
 		
 	}

@@ -11,7 +11,7 @@ public class Main {
 	public static void main(String[] args) throws FileNotFoundException {
 		long startTime = System.nanoTime();
 		
-		String datafile = "8P5R1V_java.txt";
+		String datafile = "10P5R1V_java.txt";
 		
 		File file = new File ("8P5R1V_java_results.txt");
 		

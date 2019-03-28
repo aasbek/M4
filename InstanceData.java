@@ -18,6 +18,8 @@ public class InstanceData {
 	public float[][] times;
 	public float[][] distances;
 	public int numberOfCities;
+	public int numberOfVehicles; 
+
 	
 	public InstanceData(String datafile) {
 		this.instanceName = datafile;

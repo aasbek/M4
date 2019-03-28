@@ -122,6 +122,14 @@ public class InputReader {
 			depot.get(0).location = number;
 			depot.get(0).getLocation(number);
 			
+			// Finding the number of vehicles
+			Vector<Integer> vehicles = new Vector<Integer>();
+			for(int i = 1; i < list1.length; i++){
+				int number2 = Integer.parseInt(list1[i].trim());
+				vehicles.add(number2);
+			} 
+			inputdata.numberOfVehicles = vehicles.size();
+			
 			// Assigning location to the end depot (zero time and distance to every other node)
 			line = fr.readLine();
 			list1 = line.split(",");
