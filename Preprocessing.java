@@ -38,18 +38,18 @@ public class Preprocessing {
 					Node delivery2 = nodes.get(pickup2.number+1);
 					Node delivery = nodes.get(pickup.number+1);
 					float time = pickup2.lateTimeWindow-(pickup.weight*inputdata.timeTonService)-
-							inputdata.getTime(pickup, pickup2);
+							inputdata.getTime(pickup, pickup2); // Checking if the time for traveling from pickup 1 to another pickup 2 is so large that the time window in pickup 2 will be violated
 					float time2= delivery2.lateTimeWindow-pickup2.weight *inputdata.timeTonService-inputdata.getTime(pickup2, delivery2)-
-							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2);
+							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2); // Checking whether when going from pickup 1 to pickup 2, and then to delivery 2 will violate the TW in delivery 2 
 					float time3 = delivery.lateTimeWindow-delivery2.weight*inputdata.timeTonService -inputdata.getTime(delivery2, delivery)-
 							pickup2.weight *inputdata.timeTonService-inputdata.getTime(pickup2, delivery2)-
-							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2);
+							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2); // Checking whether going from pickup 1 to pickup 2, then to delivery 2, and at last to delivery 1 will violate the TW in delivery 1
 					float time4 = delivery2.lateTimeWindow-delivery.weight*inputdata.timeTonService -inputdata.getTime(delivery, delivery2)-
 							pickup2.weight *inputdata.timeTonService-inputdata.getTime(pickup2, delivery)-
-							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2);
+							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, pickup2); // Checking whether going from pickup 1 to pickup 2, from pickup 2 to delivery 1, and then from delivery 1 to delivery 2 will violate the TW in delivery 2
 					float time5 = delivery2.lateTimeWindow-pickup.weight*inputdata.timeTonService -inputdata.getTime(pickup2, delivery2)-
 							delivery.weight *inputdata.timeTonService-inputdata.getTime(delivery, pickup2)-
-							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, delivery);
+							-pickup.weight *inputdata.timeTonService-inputdata.getTime(pickup, delivery); // Checking whether going from pickup 1 to delivery 1, from delivery 1 to pickup 2 and from pickup 2 to delivery 2 will violate the TW in delivery 2
 					unreachableNodesFromNode.get(pickup.number)[pickup2.number] = Math.min(time,Math.min(time2, Math.max(time3, Math.max(time4, time5))));
 //					System.out.println(pickup.earlyTimeWindow);
 //					System.out.println((pickup.weight*inputdata.timeTonService));
@@ -71,7 +71,7 @@ public class Preprocessing {
 					
 					time = pickup2.lateTimeWindow-(pickup.weight*inputdata.timeTonService)-
 							inputdata.getTime(delivery, pickup2);
-					 time2= delivery2.lateTimeWindow-pickup2.weight *inputdata.timeTonService-inputdata.getTime(pickup2, delivery2)-
+					time2= delivery2.lateTimeWindow-pickup2.weight *inputdata.timeTonService-inputdata.getTime(pickup2, delivery2)-
 							 -pickup.weight *inputdata.timeTonService-inputdata.getTime(delivery, pickup2);
 					unreachableNodesFromNode.get(delivery.number)[pickup2.number] = Math.min(time,time2);
 //					if(Math.min(time,time2)<delivery.earlyTimeWindow) {
@@ -121,7 +121,7 @@ public class Preprocessing {
 //					System.out.println("checking for node "+pickup.number+" and "+pickup2.number);
 //					Node delivery2 = nodes.get(pickup2.number+1);
 					float time = delivery2.lateTimeWindow-(pickup.weight*inputdata.timeTonService)-
-							inputdata.getTime(delivery, delivery2);
+							inputdata.getTime(delivery, delivery2); // Checking if going from delivery 1 to delivery 2 violates TW in delivery 2
 //					float time2= delivery2.lateTimeWindow-pickup2.weight *inputdata.timeTonService+inputdata.getTime(pickup2, delivery2)-
 //							Math.max(time, pickup2.earlyTimeWindow);
 					unreachableDelNodesFromNode.get(delivery.number)[delivery2.number] = time;
@@ -144,7 +144,7 @@ public class Preprocessing {
 					
 					
 					time = delivery2.lateTimeWindow-(pickup.weight*inputdata.timeTonService)-
-							inputdata.getTime(pickup, delivery2);
+							inputdata.getTime(pickup, delivery2); // Checking if going from pickup 1 to delivery 2 violates TW in delivery 2
 					unreachableDelNodesFromNode.get(pickup.number)[delivery2.number] = time;
 					if(time<pickup.lateTimeWindow) {
 						//System.out.println("node "+pickup.number+" and "+delivery2.number);
@@ -187,10 +187,10 @@ public class Preprocessing {
 //					Node delivery2 = nodes.get(pickup2.number+1);
 					float time = delivery2.lateTimeWindow-(delivery2.weight*inputdata.timeTonService)-
 							inputdata.getTime(delivery, delivery2) - (delivery.weight*inputdata.timeTonService)-
-							inputdata.getTime(node, delivery);
+							inputdata.getTime(node, delivery); // If going from any node to delivery 1, and then to delivery 2 violates TW in delivery 2
 					float time2 = delivery.lateTimeWindow-(delivery.weight*inputdata.timeTonService)-
 							inputdata.getTime(delivery2, delivery) - (delivery2.weight*inputdata.timeTonService)-
-							inputdata.getTime(node, delivery2);
+							inputdata.getTime(node, delivery2); // If going from any node to delivery 2, and then to delivery 1 violates TW in delivery 1
 //					float time2= delivery2.lateTimeWindow-pickup2.weight *inputdata.timeTonService+inputdata.getTime(pickup2, delivery2)-
 //							Math.max(time, pickup2.earlyTimeWindow);
 					String temp = "";
