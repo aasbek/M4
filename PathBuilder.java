@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.PriorityQueue;
 import java.util.Vector;
 
+import gurobi.GRBEnv;
+
 public class PathBuilder {
 	public Vector<Node> nodes;
 	public Vector<Node> pickupNodes;
