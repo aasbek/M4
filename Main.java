@@ -28,13 +28,17 @@ public class Main {
 		Vector<Node> depot = new Vector<Node>();
 		Vector<Node> pickupNodes = new Vector<Node>();
 		Vector<Node> deliveryNodes = new Vector<Node>();
+		Vector<Node> startDepots = new Vector<Node>();
+		Vector<Vehicle> vehicles = new Vector<Vehicle>();
+		Vector<Route> routes = new Vector<Route>();
+		
 		
 		InstanceData inputdata = new InstanceData(datafile);
 
-		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes) ;
+		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes, startDepots, vehicles) ;
 
 		PathBuilder builder;
-		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw);
+		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes);
 		builder.BuildPaths();
 		//System.out.println(Node.getCorrespondingNode(nodes.get(2),nodes).number);
 		

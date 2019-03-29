@@ -7,7 +7,7 @@ import java.util.Vector;
 
 
 public class InputReader {
-	public static void inputReader(String datafile,  Vector<Node> nodes, InstanceData inputdata, Vector<Node> depot, Vector<Node> pickupNodes, Vector<Node> deliveryNodes) {
+	public static void inputReader(String datafile,  Vector<Node> nodes, InstanceData inputdata, Vector<Node> depot, Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node>startDepots, Vector<Vehicle>vehicles) {
 		try {
 			File file = new File(datafile);
 			//File file2 = file.getAbsoluteFile();
@@ -118,22 +118,25 @@ public class InputReader {
 			// Assigning location to the startdepot
 			line = fr.readLine();
 			list1 = line.split(",");
-			int number = Integer.parseInt(list1[1].trim());
-			depot.get(0).location = number;
-			depot.get(0).getLocation(number);
-			
-			// Finding the number of vehicles
-			Vector<Integer> vehicles = new Vector<Integer>();
 			for(int i = 1; i < list1.length; i++){
 				int number2 = Integer.parseInt(list1[i].trim());
-				vehicles.add(number2);
-			} 
+				Vehicle v = new Vehicle (i);
+				Node startDepot = new Node (0);
+				startDepot.location = number2;
+				startDepot.type = "Depot";
+				startDepot.getLocation(number2);
+				vehicles.add(v);
+				v.startDepot = startDepot;
+				depot.get(i-1).location = number2;
+				depot.get(i-1).getLocation(number2);
+			}
+			
 			inputdata.numberOfVehicles = vehicles.size();
 			
 			// Assigning location to the end depot (zero time and distance to every other node)
 			line = fr.readLine();
 			list1 = line.split(",");
-			number = Integer.parseInt(list1[1].trim());
+			int number = Integer.parseInt(list1[1].trim());
 			depot.get(1).location = number;
 			depot.get(1).getLocation(number);
 			

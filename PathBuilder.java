@@ -11,15 +11,20 @@ public class PathBuilder {
 	public Vector<Node> pickupNodes;
 	public Vector<Node> deliveryNodes;
 	public Vector<Node> depot;
+	public Vector<Node> startDepots;
+	public Vector <Vehicle> vehicles;
 	public InstanceData inputdata;
+	public Vector<Route> routes;
 	public PrintWriter pw;
 	private double zeroTol = 0.001;
 	private int numberOfDominatedLabels;
 	public Preprocessing preprocess;
 	int numRoutes = 0;
+	public Vehicle vehicle;
+	public Vector <Integer> ifVisited; 
 	
 	
-	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw) {
+	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw, Vector<Route>routes) {
 		this.pickupNodes = pickupNodes;
 		this.nodes = nodes;
 		this.deliveryNodes = deliveryNodes;
@@ -2093,7 +2098,8 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 		//for(Label i : list) {
 		//System.out.println(i.toString());
 		//}
-
+		
+		
 	
 		return list;
 	}
@@ -2189,8 +2195,6 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 	
 	public Label findBestLabel(Vector<Label> list) throws NullPointerException {
 		float currentBestProfit = 0;
-		Route route = new Route();
-		route.path = new Vector<Node>();
 		Label bestLabel = null;
 		for(Label i : list) {
 			if(i.profit > currentBestProfit) {
@@ -2203,22 +2207,26 @@ public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { //daily rest bef
 			//System.out.println ("No feasible solution");
 			throw new NullPointerException ("No feasible solution");	
 		}
-		
+		Route route = new Route();
+		//routes.add(route);
+		route.path = new Vector<Node>();
+
 		route.profit = bestLabel.profit;
-		int i = 0;
-		
 		
 		Label temp = bestLabel.predesessor;
 		while(temp!=null) {
 			System.out.println(temp.toString());
 			pw.println(temp.toString());
 			route.path.add(temp.node);
-			i++;
 		temp=temp.predesessor;
 		} 
 		pw.println(bestLabel.toString());
 		numRoutes = numRoutes +1;
+		
+
+		
 		return bestLabel;
+		
 		
 	}
 	

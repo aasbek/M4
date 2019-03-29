@@ -9,47 +9,91 @@ import gurobi.*;
 
 	public class GurobiInterface {
 		public Vector<Node> route;
-		public float profit;
-		GRBConstr c1;
-	    GRBConstr c2;
+		public double profit;
+		//GRBConstr c1;
+	    //GRBConstr c2;
 	    GRBEnv    env   = new GRBEnv("mip1.log");
 	    GRBModel  model = new GRBModel(env);
 		public InstanceData inputdata;
 		int numRoutes;
+		public Vector<Node> pickupNodes;
+		public Vector<Node> deliveryNodes;
+		public Vector<Node> nodes;
+		public Vector<Node> depot;
+		public PrintWriter pw;
+		public Vector<Route> routes;
 		
 		
-		
-		public GurobiInterface(PathBuilder pathBuilder, Route route, InstanceData inputdata) throws GRBException {
+		public GurobiInterface(PathBuilder pathBuilder, Route route, InstanceData inputdata, Vector<Node> PickupNodes) throws GRBException {
 			this.route = route.path;
 			this.profit = route.profit;
 			this.inputdata = inputdata;
 			//GRBConstr c1;
 		    //GRBConstr c2;
-		    GRBVar lambda[][];
+		    //GRBVar lambda[][];
 		    //this.env  = new GRBEnv("mip1.log");
 		    //GRBModel  model = new GRBModel(env);
 		    int numRoutes = pathBuilder.numRoutes;
 		}
 		
-		//PathBuilder builder;
-		//builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw);
+			
 		
-	 // GRBVar lambda[Int][Int] = new GRBVar[Int][Int]();
-	//    try {
-	   //   new GRBVar lambda[][] = new GRBVar[][]();
-		   public void MasterProblem (int profit, Route route)  {
-			   try {
-			   
-			   int numberOfVehicles = inputdata.numberOfVehicles;
-	      // Create variables
-	  
-	      //PathBuilder subproblem = new PathBuilder(); 
-	    GRBVar[][] lambdas = new GRBVar[numberOfVehicles][numRoutes];
-	    for (int i = 0; i < numberOfVehicles; i++) {
-	    	for (int j = 0; j < numRoutes; j++) {
-	    		lambdas[i][j] = model.addVar( 0.0, GRB.INFINITY, profit, GRB.CONTINUOUS, null);
-	    	}
-	    }
+		
+		
+		public void MasterProblem (int profit, Route route)  {
+			try {
+				
+				double dual1 = 0;
+				double dual2 = 0;
+		
+			while(dual1 > 0.0 && dual2 > 0.0) {
+				
+				PathBuilder builder;
+				builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes);
+				builder.BuildPaths();
+				
+				
+			int numberOfVehicles = inputdata.numberOfVehicles;
+
+			GRBVar[][] lambdas = new GRBVar[numberOfVehicles][numRoutes];
+			for (int i = 0; i < numberOfVehicles; i++) {
+				for (int j = 0; j < numRoutes; j++) {
+					lambdas[i][j] = model.addVar(0.0, GRB.INFINITY, profit, GRB.CONTINUOUS, null);
+	    		}
+			}
+			
+			
+			// Objective function: profit * lambda 
+			
+			//for (int i = 0; i < numberOfVehicles; i++) {
+			//	for (int j = 0; j < numRoutes; j++) {
+					GRBLinExpr objective = new GRBLinExpr();
+					objective = new GRBLinExpr();
+					objective.addTerms(profit, lambdas);
+					model.setObjective(objective, GRB.MAXIMIZE);
+	    	//	}
+			//}
+			
+			// Constraint 1: Visited(ikr) * lambda <= 1
+			
+			GRBLinExpr c1;
+			for (int i = 0; i < pickupNodes.size(); i++) {	
+				c1 = new GRBLinExpr();
+				c1.addTerms(Visited[i], lambdas);
+				model.addConstr(c1, GRB.LESS_EQUAL, 1.0, "c1");
+			}
+			
+			dual1 = c1.get(GRB.DoubleAttr.Pi);
+			
+			
+			GRBLinExpr c2;
+			for(int i = 0; i < numberOfVehicles; i++) {
+				c2 = new GRBLinExpr();
+				c2.addTerms(null, lambdas[i]);
+				model.addConstr(c2, GRB.EQUAL, 1.0, "c2");
+			} 
+			
+			dual2 = c2.get(GRB.DoubleAttr.Pi);
 	       
 		//lambda[numberOfVehicles][numRoutes] = model.addVars( null, null, null, null, null);
 	      
@@ -95,8 +139,12 @@ import gurobi.*;
 
 	      System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
 
-	      // Dispose of model and environment
+	
 	      */
+			
+			}
+			
+		      // Dispose of model and environment
 		   
 	      model.dispose();
 	      env.dispose();
