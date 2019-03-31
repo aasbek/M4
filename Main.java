@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,7 +22,6 @@ public class Main {
 		}
 		
 		PrintWriter pw = new PrintWriter(file);	
-		
 		Vector<Node> nodes = new Vector<Node>();
 		Vector<Node> depot = new Vector<Node>();
 		Vector<Node> pickupNodes = new Vector<Node>();
@@ -35,15 +33,13 @@ public class Main {
 		
 		InstanceData inputdata = new InstanceData(datafile);
 
-		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes, startDepots, vehicles) ;
+		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes, startDepots, vehicles);
 
 		PathBuilder builder;
 		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes);
 		builder.BuildPaths();
-		//System.out.println(Node.getCorrespondingNode(nodes.get(2),nodes).number);
 		
-		
-		//code
+		//time
 		long endTime = System.nanoTime();
 		System.out.println("Took "+(endTime - startTime)/1000000 + " milli seconds"); 
 		pw.println ("Took "+(endTime - startTime)/1000000 + " milli seconds");

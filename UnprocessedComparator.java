@@ -2,15 +2,9 @@
 import java.util.Comparator;
 
 public class UnprocessedComparator implements Comparator<Label> {
-	
-	//PriorityQueue<Label> pQueue = new PriorityQueue<Label>(10, new Comparator<Label>();
-//@Override
+	// Sorting the list of unprocessed labels such that the label with smallest time is selected first
     public int compare(Label label1, Label label2)
     {
-        // Assume neither string is null. Real code should
-        // probably be more robust
-        // You could also just return x.length() - y.length(),
-        // which would be more efficient.
         if (label1.time < label2.time)
         {
             return -1;

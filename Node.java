@@ -1,6 +1,4 @@
-// import java.util.ArrayList;
 import java.util.Vector;
-
 
 public class Node {
 	public int number; 
@@ -24,19 +22,19 @@ public class Node {
        locationName= " Fredrikstad";
        break;
    case 2:
-       locationName= "Røros";
+       locationName= "Rï¿½ros";
        break;
    case 3:
        locationName= " Steinkjer";
        break;
    case 4:
-       locationName= "Beitostølen";
+       locationName= "Beitostï¿½len";
        break;
    case 5:
        locationName= " Drammen";
        break;
    case 6:
-       locationName= "Tønsberg";
+       locationName= "Tï¿½nsberg";
        break;
    case 7:
        locationName= " Kongsvinger";
@@ -54,13 +52,13 @@ public class Node {
        locationName= " Meldal";
        break;
    case 12:
-       locationName= "Meråker";
+       locationName= "Merï¿½ker";
        break;
    case 13:
        locationName= " Hassdalen";
        break;
    case 14:
-       locationName= "Krokstadøra";
+       locationName= "Krokstadï¿½ra";
        break;
    case 15:
        locationName= "Sistranda";
@@ -87,10 +85,10 @@ public class Node {
        locationName= "Meldal";
        break;
    case 23:
-       locationName= " Vinjeøra";
+       locationName= " Vinjeï¿½ra";
        break;
    case 24:
-       locationName= "Berkåk";
+       locationName= "Berkï¿½k";
        break;
    case 25:
        locationName= " Oppdal";
@@ -102,13 +100,13 @@ public class Node {
        locationName= " Rennebu";
        break;
    case 28:
-       locationName= "Dombås";
+       locationName= "Dombï¿½s";
        break;
    case 29:
        locationName= " Elverum";
        break;
    case 30:
-       locationName= "Åndalsnes";
+       locationName= "ï¿½ndalsnes";
        break;
    case 31:
        locationName= " Lillehammer";
@@ -123,13 +121,13 @@ public class Node {
        locationName= "Fagernes";
        break;
    case 35:
-       locationName= " Lillestrøm";
+       locationName= " Lillestrï¿½m";
        break;
    case 36:
        locationName= "Haltdalen";
        break;
    case 37:
-       locationName= " Stjørdal";
+       locationName= " Stjï¿½rdal";
        break;
    case 38:
        locationName= "Grimsbu";
@@ -150,7 +148,7 @@ public class Node {
        locationName= " Flisa";
        break;
    case 44:
-       locationName= "Skåbu";
+       locationName= "Skï¿½bu";
        break;
    case 45:
        locationName= " Fossbergom";
@@ -168,7 +166,7 @@ public class Node {
        locationName= " Porsgrunn";
        break;
    case 50:
-       locationName= "Ålesund";
+       locationName= "ï¿½lesund";
        break;
    case 51:
 	   locationName = "EndDepot";
@@ -192,15 +190,9 @@ public class Node {
 				if (nodes.get(i).number== num-1){
 				Node node1 = nodes.get(i); 
 				return node1;
-				}
-					
-				}		
-		
+				}	
+			}		
 		}  
 		return null;
-	
-		}
-
-
-
+	}
 }
