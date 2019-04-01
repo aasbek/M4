@@ -1,30 +1,49 @@
-	import java.io.IOException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Vector;
 import gurobi.GRB.DoubleAttr;
 import gurobi.GRB.IntAttr;
 import gurobi.*;
 
 	public class GurobiInterface {
-		public Vector<Node> route;
-		public double profit;
-		//GRBConstr c1;
-	    //GRBConstr c2;
+		
+		// Creating Gurobi environment
 	    GRBEnv    env   = new GRBEnv("mip1.log");
 	    GRBModel  model = new GRBModel(env);
-		public InstanceData inputdata;
-		int numRoutes;
+	    
+	    // Creating Gurobi variables
+	    private GRBVar[][] lambda;
+		
+	    // Creating Gurobi constraints
+		public GRBConstr[] visitedPickups;
+		public GRBConstr[] oneVisit; 
+		
+		// Creating Gurobi objective function
+		public GRBLinExpr obj;
+		
+	    public InstanceData inputdata;
+		public double profit;
 		public Vector<Node> pickupNodes;
 		public Vector<Node> deliveryNodes;
 		public Vector<Node> nodes;
 		public Vector<Node> depot;
 		public PrintWriter pw;
+		public Vector<Node> path;
 		public Vector<Route> routes;
+		public Vector<Vehicle> vehicles;
+		public PathBuilder builder;
+		
+		 
+		private Hashtable<Integer, Label> pathList;
 		
 		
-		public GurobiInterface(PathBuilder pathBuilder, Route route, InstanceData inputdata, Vector<Node> PickupNodes) throws GRBException {
-			this.route = route.path;
+		
+		public GurobiInterface(InstanceData inputdata, Vector<Node> PickupNodes, Vector<Vehicle> vehicles) throws GRBException {
+			this.vehicles = vehicles; 
+			this.builder = new PathBuilder(vessels, customers, inputdata);
+			this.path = route.path;
 			this.profit = route.profit;
 			this.inputdata = inputdata;
 			//GRBConstr c1;

@@ -21,7 +21,7 @@ public class PathBuilder {
 	private int numberOfDominatedLabels;
 	int numRoutes = 0;
 
-	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw, Vector<Route> routes) {
+	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw, Vector<Route> routes, Vector<Vehicle> vehicles) {
 		this.nodes = nodes;
 		this.pickupNodes = pickupNodes;
 		this.deliveryNodes = deliveryNodes;

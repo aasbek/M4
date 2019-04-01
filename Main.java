@@ -36,7 +36,7 @@ public class Main {
 		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes, startDepots, vehicles);
 
 		PathBuilder builder;
-		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes);
+		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes, vehicles);
 		builder.BuildPaths();
 		
 		//time
