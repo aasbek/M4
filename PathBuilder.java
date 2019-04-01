@@ -670,26 +670,6 @@ public class PathBuilder {
 			return null;
 		}
 		
-		// Adds a second intermediate break if necessary because of the consecutive driving or working time or possible because the waiting time is larger than 45 minutes
-		if (waitingTime >= intermediateBreakTime || consecutiveDrivingTime > maxConsecutiveDrivingTime || consecutiveWorkingTime > maxWorkingTime ) { 
-			arrivalTime =  Math.max(L.time+inputdata.getTime(L.node, node)+L.node.weight*inputdata.timeTonService + 2*intermediateBreakTime, node.earlyTimeWindow); 
-			float timeToSecondBreak = Math.min(maxWorkingTime,  maxConsecutiveDrivingTime);
-			float drivingTimeBetweenBreaks = Math.min(maxConsecutiveDrivingTime, maxWorkingTime);
-			// The start time of the second intermediate break is either placed at the end of the arc or where the maximal driving or working time is reached
-			startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreakTime, startTimeIntermediateBreak + intermediateBreakTime + timeToSecondBreak);
-			if (consecutiveDrivingTime > maxConsecutiveDrivingTime) {
-				startTimeIntermediateBreak = Math.min(arrivalTime - intermediateBreakTime, startTimeIntermediateBreak + intermediateBreakTime + maxConsecutiveDrivingTime);
-			}
-			// If the second intermediate break is placed at the end of the arc, reset the values for consecutive driving and working time
-			consecutiveWorkingTime = 0;
-			consecutiveDrivingTime = 0;
-			// If the second intermediate break must be taken before the end of the arc, calculate the consecutive driving and working time left as below. The only working time that is left is driving time (no service time)
-			if(startTimeIntermediateBreak < arrivalTime - intermediateBreakTime) { 
-				consecutiveWorkingTime = arcDrivingTime - maxConsecutiveDrivingTime - timeDrivenBeforeFirstBreak; 
-				consecutiveDrivingTime = arcDrivingTime - maxConsecutiveDrivingTime - timeDrivenBeforeFirstBreak; 
-			}
-		}
-		
 		//  If the consecutive driving time is still larger than its maximum of 4.5, do not extend the label
 		if (consecutiveDrivingTime > maxConsecutiveDrivingTime) {
 			return null;
@@ -1187,7 +1167,7 @@ public class PathBuilder {
 
 
 	// Label extension with one intermediate break before a daily rest and then possibly another intermediate break 
-	public Label LabelExtensionWithTwoBreaks(Node node, Label L) { 	
+	public Label LabelExtensionWithIntermediateBreakBeforeDailyRest(Node node, Label L) { 	
 		
 		// Cannot return to start depot
 		if(node.number == 0){
@@ -1494,7 +1474,7 @@ public class PathBuilder {
 	
 
 	// Daily rest before an intermediate break, and then possibly another daily rest
-	public Label LabelExtensionWithTwoBreaks2(Node node, Label L) { 
+	public Label LabelExtensionWithDailyRestBeforeIntermediateBreak(Node node, Label L) { 
 		
 		// Cannot return to start depot
 		if(node.number == 0){
@@ -1768,7 +1748,7 @@ public class PathBuilder {
 			L2.consecutiveDrivingTime = consecutiveDrivingTime;
 			L2.startTimeIntermediateBreak = startTimeIntermediateBreak ;
 			L2.consecutiveWorkingTime = consecutiveWorkingTime;
-	//	
+		
 			// Adding all elements from the predecessor's unreachablePickupNodes to this label's unreachablePickupNodes
 			L2.unreachablePickupNodes = new Vector<Integer>();
 			for(int i : L.unreachablePickupNodes) {
@@ -1836,286 +1816,277 @@ public class PathBuilder {
 		// Creating lists unprocessed labels at node i, and processed labels at node i
 		ArrayList<Vector<Label>> unprocessedAtNode = new ArrayList<Vector<Label>>();
 		ArrayList<Vector<Label>> processedAtNode = new ArrayList<Vector<Label>>();
-		// Adding nodes to the unprocessed and processed lists
+		// Adding nodes to the processed and unprocessed lists
 		for(int i = 0; i < nodes.size(); i++) {
 			Vector<Label> processed = new Vector<Label>();
 			processedAtNode.add(i, processed);
 			Vector<Label> unprocessed = new Vector<Label>();
 			unprocessedAtNode.add(i, unprocessed);
 		}
-		// Organizing the list of unprocessed labels such that those with small time is selected first
+		// Organizing the list of unprocessed labels such that those with smallest time is selected first
 		PriorityQueue<Label> unprocessedQueue = new PriorityQueue<Label>(5, new UnprocessedComparator()); 
+		// Adding L to the set of unprocessed labels
 		unprocessedQueue.add(L);
-		
 		int counter = 0;
 		//Going through all unprocessed labels
 		while(!unprocessedQueue.isEmpty()) { 
+			
 			Label label = unprocessedQueue.remove();
 			counter++;
-			if(counter%1000 == 0) {
+			// Print current label every 1000 labels
+			//if(counter%1000 == 0) {
 				//System.out.println(counter+" "+label.toString());
 				//System.out.println("number of unprocessed labels: "+unprocessedQueue.size());
-			}
-//			for(int i = 2; i < nodes.size(); i++) { // Going through all nodes except node 0 and node 1 (the depot nodes)
-//				Label newLabel = LabelExtension(nodes.get(i), label);
-//				if(newLabel!=null) {
-//					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
-//						unprocessedQueue.add(newLabel); 
-//						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
-//					}
-//				}
-//			}
-			// Going through all nodes except node 0 and node 1 (the depot nodes)
+			//}
+			
+			// Going through all pickup nodes 
 			for(Node pickup :pickupNodes) { 
 				
 				float arcDrivingTime = inputdata.getTime(label.node,  pickup);
 				float dailyDrivingTime = label.dailyDrivingTime;
+				int maxDailyDrivingTime = 9;
 				
-				if (arcDrivingTime + dailyDrivingTime <= 9){
-				Label newLabel = LabelExtension(pickup, label);
+				// Only extend labels without daily rest if the arc driving time plus the daily driving time is less than 9 (no daily rest necessary)
+				if (arcDrivingTime + dailyDrivingTime <= maxDailyDrivingTime){
+					
+					// Run label extension without daily rest or intermediate break and check dominance
+					Label newLabel = LabelExtension(pickup, label);
 				
-				if(newLabel!=null) {
-					// System.out.println(newLabel.toString());
-					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
-						unprocessedQueue.add(newLabel); 
-						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
-					}
-				}
-				
-				
-				Label newLabel3 = LabelExtensionWithIntermediateBreak(pickup, label);
-				
-				if(newLabel3!=null) {
-				//	System.out.println(newLabel3.toString());
-					if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
-						unprocessedQueue.add(newLabel3); 
-						unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
-					}
-				}
-				
-				Label newLabel6 = LabelExtensionWithTwoIntermediateBreaks(pickup, label);
-				
-				if(newLabel6!=null) {
-		//			System.out.println(newLabel.toString());
-					if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
-						unprocessedQueue.add(newLabel6); 
-						unprocessedAtNode.get(newLabel6.node.number).add(newLabel6);
-					}
-				}
-				
-				}
-				Label newLabel2 = LabelExtensionWithDailyRest(pickup, label);
-				
-				if(newLabel2!=null) {
-			//		System.out.println(newLabel2.toString());
-					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
-						unprocessedQueue.add(newLabel2); 
-						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
-					}
-				}
-				
-
-				float intermediateBreakTime = Float.parseFloat("0.75");
-				float maxDrivingTime = Float.parseFloat("4.5");
-				int dailyRestTime = 9;
-				float waitingTime = pickup.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  pickup) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
-				
-				
-				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
-				Label newLabel4 = LabelExtensionWithTwoBreaks(pickup, label);
-				
-					if(newLabel4!=null) {
-				//		System.out.println(newLabel3.toString());
-						if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
-							unprocessedQueue.add(newLabel4); 
-							unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
+					if(newLabel!=null) {
+						if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
+							unprocessedQueue.add(newLabel); 
+							unprocessedAtNode.get(newLabel.node.number).add(newLabel);
 						}
-					}			
-				}
-				
-				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
-				Label newLabel5 = LabelExtensionWithTwoBreaks2(pickup, label);
-				
-					if(newLabel5!=null) {
-				//		System.out.println(newLabel3.toString());
-						if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
-							unprocessedQueue.add(newLabel5); 
-							unprocessedAtNode.get(newLabel5.node.number).add(newLabel5);
+					}
+					
+					// Run label extension with intermediate break and check dominance
+					Label newLabel2 = LabelExtensionWithIntermediateBreak(pickup, label);
+					
+					if(newLabel2!=null) {
+						if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
+							unprocessedQueue.add(newLabel2); 
+							unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
 						}
-					}			
-				}
-			}	
-				
-			for(int i : label.openNodes) { // Going through all nodes except node 0 and node 1 (the depot nodes)
-
-				Node node = nodes.get(i+1); 
-				float arcDrivingTime = inputdata.getTime(label.node, node);
-				float intermediateBreakTime = Float.parseFloat("0.75");
-				float maxDrivingTime = Float.parseFloat("4.5");
-				int dailyRestTime = 9;
-				float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
-				float dailyDrivingTime = label.dailyDrivingTime;
-				
-				if (arcDrivingTime + dailyDrivingTime < 9) {
-				
-				Label newLabel = LabelExtension(nodes.get(i+1), label);
-				
-				if(newLabel!=null) {
-				//System.out.println(newLabel.toString());
-					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
-						unprocessedQueue.add(newLabel); 
-						unprocessedAtNode.get(newLabel.node.number).add(newLabel);
 					}
-				}
-				
-				Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(i+1), label);
-				
-				if(newLabel3!=null) {
-				//	System.out.println(newLabel3.toString());
-					if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
-						unprocessedQueue.add(newLabel3); 
-						unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
+					
+					// Run label extension with two intermediate breaks and check dominance
+					Label newLabel3 = LabelExtensionWithTwoIntermediateBreaks(pickup, label);
+					
+					if(newLabel3!=null) {
+						if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
+							unprocessedQueue.add(newLabel3); 
+							unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
+						}
 					}
-				}
-				
-				Label newLabel6 = LabelExtensionWithTwoIntermediateBreaks(nodes.get(i+1), label);
-				
-				if(newLabel6!=null) {
-				//	System.out.println(newLabel3.toString());
-					if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
-						unprocessedQueue.add(newLabel6); 
-						unprocessedAtNode.get(newLabel6.node.number).add(newLabel6);
-					}
-				}
 				
 				}
 				
-				Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(i+1), label);
-				
-				if(newLabel2!=null) {
-					//System.out.println(newLabel2.toString());
-					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
-						unprocessedQueue.add(newLabel2); 
-						unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
-					}
-				}
-				
-
-				
-				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
-				
-				Label newLabel4 = LabelExtensionWithTwoBreaks(nodes.get(i+1), label);
+				// Run label extension with daily rest and check dominance
+				Label newLabel4 = LabelExtensionWithDailyRest(pickup, label);
 				
 				if(newLabel4!=null) {
-				//	System.out.println(newLabel3.toString());
 					if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
 						unprocessedQueue.add(newLabel4); 
 						unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
 					}
 				}
-				}
+				
+				
+				float intermediateBreakTime = Float.parseFloat("0.75");
+				float maxDrivingTime = Float.parseFloat("4.5");
+				int dailyRestTime = 11;
+				float waitingTime = pickup.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  pickup) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
+				
+				// If the waiting time is above zero or the arc driving time is above its maximum of 4.5, execute the following label extensions
 				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
 					
-				Label newLabel5 = LabelExtensionWithTwoBreaks2(nodes.get(i+1), label);
+					// Run label extension with intermediate break and then daily rest and check dominance
+					Label newLabel5 = LabelExtensionWithIntermediateBreakBeforeDailyRest(pickup, label);
+					
+						if(newLabel5!=null) {
+							if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
+								unprocessedQueue.add(newLabel5); 
+								unprocessedAtNode.get(newLabel5.node.number).add(newLabel5);
+							}
+						}			
+					
+					
+					// Run label extension with daily rest and then intermediate break and check dominance
+					Label newLabel6 = LabelExtensionWithDailyRestBeforeIntermediateBreak(pickup, label);
+					
+						if(newLabel6!=null) {
+							if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
+								unprocessedQueue.add(newLabel6); 
+								unprocessedAtNode.get(newLabel6.node.number).add(newLabel6);
+							}
+						}			
+				}
+			}	
+			
+			// Going through all nodes in the open nodes set (visited pickup nodes), and get their corresponding delivery node
+			for(int i : label.openNodes) { 
 				
-				if(newLabel5!=null) {
-				//	System.out.println(newLabel3.toString());
-					if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
-						unprocessedQueue.add(newLabel5); 
-						unprocessedAtNode.get(newLabel5.node.number).add(newLabel5);
+				Node node = nodes.get(i+1); 
+				float arcDrivingTime = inputdata.getTime(label.node, node);
+				float intermediateBreakTime = Float.parseFloat("0.75");
+				float maxDrivingTime = Float.parseFloat("4.5");
+				int dailyRestTime = 11;
+				int maxDailyDrivingTime = 9;
+				float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
+				float dailyDrivingTime = label.dailyDrivingTime;
+				
+				// Only extend labels without daily rest if the arc driving time plus the daily driving time is less than 9 (no daily rest necessary)
+				if (arcDrivingTime + dailyDrivingTime < maxDailyDrivingTime) {
+					
+					// Run label extension without daily rest or intermediate break and check dominance
+					Label newLabel = LabelExtension(nodes.get(i+1), label);
+					
+					if(newLabel!=null) {
+						if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
+							unprocessedQueue.add(newLabel); 
+							unprocessedAtNode.get(newLabel.node.number).add(newLabel);
+						}
+					}
+					
+					// Run label extension with intermediate break and check dominance
+					Label newLabel2 = LabelExtensionWithIntermediateBreak(nodes.get(i+1), label);
+					
+					if(newLabel2!=null) {
+						if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
+							unprocessedQueue.add(newLabel2); 
+							unprocessedAtNode.get(newLabel2.node.number).add(newLabel2);
+						}
+					}
+					
+					// Run label extension without two intermediate breaks and check dominance
+					Label newLabel3 = LabelExtensionWithTwoIntermediateBreaks(nodes.get(i+1), label);
+					
+					if(newLabel3!=null) {
+						if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
+							unprocessedQueue.add(newLabel3); 
+							unprocessedAtNode.get(newLabel3.node.number).add(newLabel3);
+						}
 					}
 				}
+				
+				
+				// Run label extension with daily rest and check dominance
+				Label newLabel4 = LabelExtensionWithDailyRest(nodes.get(i+1), label);
+				
+				if(newLabel4!=null) {
+					if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
+						unprocessedQueue.add(newLabel4); 
+						unprocessedAtNode.get(newLabel4.node.number).add(newLabel4);
+					}
 				}
 				
+
+				// If the waiting time is above zero or the arc driving time is above its maximum of 4.5, execute the following label extensions
+				if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
+				
+					// Run label extension with intermediate break and then daily rest and check dominance
+					Label newLabel5 = LabelExtensionWithIntermediateBreakBeforeDailyRest(nodes.get(i+1), label);
+					
+					if(newLabel5!=null) {
+						if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
+							unprocessedQueue.add(newLabel5); 
+							unprocessedAtNode.get(newLabel5.node.number).add(newLabel5);
+						}
+					}
+					
+					// Run label extension with daily rest and then intermediate break and check dominance	
+					Label newLabel6 = LabelExtensionWithDailyRestBeforeIntermediateBreak(nodes.get(i+1), label);
+					
+					if(newLabel6!=null) {
+					//	System.out.println(newLabel3.toString());
+						if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
+							unprocessedQueue.add(newLabel6); 
+							unprocessedAtNode.get(newLabel6.node.number).add(newLabel6);
+						}
+					}
+				}
 			}
+			
+			// Extending labels to the end depot
 			Node node = nodes.get(1);
 			float arcDrivingTime = inputdata.getTime(label.node, node);
 			float dailyDrivingTime = label.dailyDrivingTime;
+			int maxDailyDrivingTime = 9;
 			
-			if (arcDrivingTime + dailyDrivingTime < 9) {
+			// Only extend labels without daily rest if the arc driving time plus the daily driving time is less than 9 (no daily rest necessary)
+			if (arcDrivingTime + dailyDrivingTime < maxDailyDrivingTime) {
 			
-			Label newLabel = LabelExtension(nodes.get(1), label); // Adding node 1 (the end depot node) to the end of the path 
-			
-			if(newLabel!=null) {
-				//System.out.println(newLabel.toString());
-				if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
-					list.add(newLabel);
+				// Run label extension without daily rest or intermediate break and check dominance
+				Label newLabel = LabelExtension(nodes.get(1), label); 
+				
+				if(newLabel!=null) {
+					if(checkdominance(newLabel, unprocessedQueue, unprocessedAtNode.get(newLabel.node.number), processedAtNode.get(newLabel.node.number))) {
+						list.add(newLabel);
+					}
 				}
-			}
-			Label newLabel3 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
-			
-			if(newLabel3!=null) {
-				//System.out.println(newLabel3.toString());
-				if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
-					list.add(newLabel3);
+				
+				// Run label extension with intermediate break and check dominance
+				Label newLabel2 = LabelExtensionWithIntermediateBreak(nodes.get(1), label);
+				
+				if(newLabel2!=null) {
+					if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
+						list.add(newLabel2);
+					}
 				}
-			}
-			
-			Label newLabel6 = LabelExtensionWithTwoIntermediateBreaks(nodes.get(1), label);
-			
-			if(newLabel6!=null) {
-				//System.out.println(newLabel3.toString());
-				if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
-					list.add(newLabel6);
-				}
-			}
-			
-			
-			}
-			
-			
-			Label newLabel2 = LabelExtensionWithDailyRest(nodes.get(1), label);
-			
-			if(newLabel2!=null) {
-			//	System.out.println(newLabel2.toString());
-				if(checkdominance(newLabel2, unprocessedQueue, unprocessedAtNode.get(newLabel2.node.number), processedAtNode.get(newLabel2.node.number))) {
-					list.add(newLabel2);
+				
+				// Run label extension with two intermediate breaks and check dominance
+				Label newLabel3 = LabelExtensionWithTwoIntermediateBreaks(nodes.get(1), label);
+				
+				if(newLabel3!=null) {
+					if(checkdominance(newLabel3, unprocessedQueue, unprocessedAtNode.get(newLabel3.node.number), processedAtNode.get(newLabel3.node.number))) {
+						list.add(newLabel3);
+					}
 				}
 			}
 			
-
-	
-			float intermediateBreakTime = Float.parseFloat("0.75");
-			float maxDrivingTime = Float.parseFloat("4.5");
-			int dailyRestTime = 9;
-			float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
-			
-			
-			if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
-			
-			Label newLabel4 = LabelExtensionWithTwoBreaks(nodes.get(1), label);
+			// Run label extension with daily rest and check dominance
+			Label newLabel4 = LabelExtensionWithDailyRest(nodes.get(1), label);
 			
 			if(newLabel4!=null) {
-				//System.out.println(newLabel3.toString());
 				if(checkdominance(newLabel4, unprocessedQueue, unprocessedAtNode.get(newLabel4.node.number), processedAtNode.get(newLabel4.node.number))) {
 					list.add(newLabel4);
 				}
 			}
-			}
 			
+			
+			float intermediateBreakTime = Float.parseFloat("0.75");
+			float maxDrivingTime = Float.parseFloat("4.5");
+			int dailyRestTime = 11;
+			float waitingTime = node.earlyTimeWindow - (label.time + inputdata.getTime(label.node,  node) + label.node.weight*inputdata.timeTonService + intermediateBreakTime + dailyRestTime);
+			
+			// If the waiting time is above zero or the arc driving time is above its maximum of 4.5, execute the following label extensions
 			if (waitingTime > 0 || arcDrivingTime > maxDrivingTime) {
-				
-			Label newLabel5 = LabelExtensionWithTwoBreaks2(nodes.get(1), label);
 			
-			if(newLabel5!=null) {
-				//System.out.println(newLabel3.toString());
-				if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
-					list.add(newLabel5);
+				// Run label extension with intermediate break and then daily rest and check dominance
+				Label newLabel5 = LabelExtensionWithIntermediateBreakBeforeDailyRest(nodes.get(1), label);
+				
+				if(newLabel5!=null) {
+					//System.out.println(newLabel3.toString());
+					if(checkdominance(newLabel5, unprocessedQueue, unprocessedAtNode.get(newLabel5.node.number), processedAtNode.get(newLabel5.node.number))) {
+						list.add(newLabel5);
+					}
+				}
+				
+				// Run label extension with daily rest and then intermediate break and check dominance	
+				Label newLabel6 = LabelExtensionWithDailyRestBeforeIntermediateBreak(nodes.get(1), label);
+				
+				if(newLabel6!=null) {
+					//System.out.println(newLabel3.toString());
+					if(checkdominance(newLabel6, unprocessedQueue, unprocessedAtNode.get(newLabel6.node.number), processedAtNode.get(newLabel6.node.number))) {
+						list.add(newLabel6);
+					}
 				}
 			}
-			}
-			
-			processedAtNode.get(label.node.number).add(label); // The label removed from unprocessed is added to processed
+			// The label removed from unprocessed list is added to the processed list
+			processedAtNode.get(label.node.number).add(label); 
 		}
 		
-
-		//for (Label i : list) {
-		//System.out.println (i.toString());
-		//}
-		
-		
-		
-//		System.out.println("Number of paths:" + processed.size());
+		//	System.out.println("Number of paths:" + processed.size());
 		System.out.println("number of non-dominated paths: "+list.size());
 		pw.println("number of non-dominated paths: "+list.size());
 		System.out.println("number of dominated labels: "+numberOfDominatedLabels);
@@ -2128,13 +2099,11 @@ public class PathBuilder {
 		//System.out.println(i.toString());
 		//}
 		
-		
-	
 		return list;
 	}
 	
-	
-	private boolean dominateLabel(Label L1, Label L2) { //Checks if L1 dominates L2
+	// Checks if L1 dominates L2
+	private boolean dominateLabel(Label L1, Label L2) { 
 		if (L1.node.number != L2.node.number) {
 			return false;
 		}
@@ -2145,21 +2114,10 @@ public class PathBuilder {
 			return false;
 		}
 
-		//if( L1.startTimeDailyRest >= L2.startTimeDailyRest && L1.dailyDrivingTime <= L2.dailyDrivingTime && L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak &&  L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime && L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) { 
-		
-		if( L1.startTimeDailyRest >= L2.startTimeDailyRest) {
-			
+		if( L1.startTimeDailyRest >= L2.startTimeDailyRest) {	
 			if ( L1.dailyDrivingTime <= L2.dailyDrivingTime ) {
-				
 				if ( L1.consecutiveDrivingTime <= L2.consecutiveDrivingTime) {
-					
-					
-			//		if(  L1.startTimeIntermediateBreak >= L2.startTimeIntermediateBreak ) {
-				
-			
 						if (L1.consecutiveWorkingTime <= L2.consecutiveWorkingTime) {
-		
-		
 							for (int i : L1.openNodes ){
 								if (!L2.openNodes.contains(i)){
 									return false;
@@ -2171,10 +2129,7 @@ public class PathBuilder {
 								}	
 							}
 							return true;	
-						}
-						//else return false;
-						
-					//}		
+						}	
 					else return false; 	
 				}
 				else return false; 	
@@ -2186,7 +2141,7 @@ public class PathBuilder {
 	
 	
 	
-	//Updates the processed and unprocessed lists according to the dominated labels.
+	// Updates the processed and unprocessed lists according to the dominated labels
 	private boolean checkdominance(Label newLabel, PriorityQueue<Label> unprocessedQueue, Vector<Label> unprocessed, Vector<Label> processed) {
 		Vector<Label> remove = new Vector<Label>();
 		
@@ -2222,6 +2177,7 @@ public class PathBuilder {
 		return true;
 	}
 	
+	// Finds the non-dominated label with the best profit and returns it as the best solution
 	public Label findBestLabel(Vector<Label> list) throws NullPointerException {
 		float currentBestProfit = 0;
 		Label bestLabel = null;
@@ -2233,9 +2189,9 @@ public class PathBuilder {
 		}
 		
 		if (bestLabel == null) {
-			//System.out.println ("No feasible solution");
 			throw new NullPointerException ("No feasible solution");	
 		}
+		
 		Route route = new Route();
 		//routes.add(route);
 		route.path = new Vector<Node>();
