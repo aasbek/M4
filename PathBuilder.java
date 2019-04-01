@@ -19,7 +19,7 @@ public class PathBuilder {
 	//public Vehicle vehicle;
 	private double zeroTol = 0.001;
 	private int numberOfDominatedLabels;
-	int numRoutes = 0;
+	int routeNumber = 1;
 
 	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw, Vector<Route> routes, Vector<Vehicle> vehicles) {
 		this.nodes = nodes;
@@ -110,6 +110,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -152,6 +153,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -224,6 +226,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -421,6 +424,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -463,6 +467,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -533,6 +538,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -704,6 +710,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -746,6 +753,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -816,6 +824,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -999,6 +1008,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1041,6 +1051,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1111,6 +1122,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1306,6 +1318,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1349,6 +1362,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1419,6 +1433,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1626,6 +1641,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1668,6 +1684,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1738,6 +1755,7 @@ public class PathBuilder {
 			
 			// Setting values for the attributes in the extended label, L2
 			Label L2 = new Label();
+			L2.vehicle = L.vehicle;
 			L2.node = node;
 			L2.predesessor = L;
 			L2.time = arrivalTime;
@@ -1793,7 +1811,7 @@ public class PathBuilder {
 	
 	
 	
-	public Vector<Label> BuildPaths() {
+	public Vector<Label> BuildPaths(Vehicle vehicle) {
 		// Creating the list of non-dominated labels
 		Vector<Label> list = new Vector<Label>();   
 		// Initializing label
@@ -1813,6 +1831,7 @@ public class PathBuilder {
 		L.startTimeIntermediateBreak = 0;
 		L.consecutiveDrivingTime = 0;
 		L.consecutiveWorkingTime = 0;
+		L.vehicle = vehicle;
 		// Creating lists unprocessed labels at node i, and processed labels at node i
 		ArrayList<Vector<Label>> unprocessedAtNode = new ArrayList<Vector<Label>>();
 		ArrayList<Vector<Label>> processedAtNode = new ArrayList<Vector<Label>>();
@@ -2195,7 +2214,9 @@ public class PathBuilder {
 		Route route = new Route();
 		//routes.add(route);
 		route.path = new Vector<Node>();
-
+		
+		route.vehicle = bestLabel.vehicle;
+		
 		route.profit = bestLabel.profit;
 		
 		Label temp = bestLabel.predesessor;
@@ -2203,10 +2224,17 @@ public class PathBuilder {
 			System.out.println(temp.toString());
 			pw.println(temp.toString());
 			route.path.add(temp.node);
+			if(temp.node.type == "PickupNode") {
+				route.pickupNodesVisited.add(temp.node.location);
+			}
 		temp=temp.predesessor;
 		} 
+		
+		route.number = routeNumber;
+		routeNumber += 1;
+		
 		pw.println(bestLabel.toString());
-		numRoutes = numRoutes +1;
+		
 	
 		return bestLabel;
 	}

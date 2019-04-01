@@ -5,6 +5,7 @@ import java.util.Vector;
 
 	public class Label {
 		public int labelNumber;
+		public Vehicle vehicle;
 		public float time; 
 		public float profit;
 		public float weightCapacityUsed;

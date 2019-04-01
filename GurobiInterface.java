@@ -37,18 +37,18 @@ import gurobi.*;
 		public PathBuilder builder;
 		public Route route;
 		 
-		private Hashtable<Integer, Label> pathList;
+		//private Hashtable<Integer, Route> pathList;
 		
+		public GRBLinExpr visitedPickupsLeftHand[];
+		public GRBLinExpr oneVisitLeftHand[];
 		
-		
-		public GurobiInterface(InstanceData inputdata, Vector<Node> pickupNodes, Vector<Vehicle> vehicles) throws GRBException {
+		public GurobiInterface(InstanceData inputdata, Vector<Node> pickupNodes, Vector<Vehicle> vehicles) throws Exception {
 			this.vehicles = vehicles; 
 			this.builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot, inputdata, pw, routes, vehicles);
 			this.path = route.path;
 			this.profit = route.profit;
 			this.inputdata = inputdata;
 			buildProblem();
-			
 		}
 		
 		public void buildProblem() throws Exception {
@@ -60,146 +60,80 @@ import gurobi.*;
 			this.visitedPickupsCon = new GRBConstr[pickupNodes.size()];
 			this.oneVisitCon = new GRBConstr[vehicles.size()];
 			
-			for(int i = 0; i < pickupNodes.size(); i++) {
-				visitedPickupsCon[i] = model.addConstr(new GRBLinExpr(), GRB.LESS_EQUAL,1,"visitedPickupCon"+i);			
-			}
+			this.oneVisitLeftHand[vehicles.size()] = new GRBLinExpr();
+			this.visitedPickupsLeftHand[pickupNodes.size()] = new GRBLinExpr();
 			
-			for(int i = 0; i < vehicles.size(); i++) {
-				oneVisitCon[i] = model.addConstr(new GRBLinExpr(), GRB.LESS_EQUAL, 1, "oneVisitCon"+i);		// skal egentlig være Equal 	
-			}
-			this.optionalVars[i]
-			model.chgCoeff(this.visitedPickupsCon[i], , -1);
-			
-			model.update();
-			
-			for(int i = 0; i < vehicles.size(); i++) {
-				for (int j = 0; j < routes.size(); j++) {
-					this.lambdaVars[i][j] = model.addVar(0, GRB.INFINITY, profit, GRB.INTEGER, "lambda_"+i);
-					
-					this.objective.addTerm(profit, this.lambdaVars[i][j]);
+			for(int k = 0; k < vehicles.size(); k++) {
+				for (int r = 0; r < routes.size(); r++) {
+					this.lambdaVars[k][r] = model.addVar(0, GRB.INFINITY, profit, GRB.INTEGER, "lambda_"+k);
+					this.objective.addTerm(profit, this.lambdaVars[k][r]);
+					model.setObjective(objective, GRB.MAXIMIZE);
 				}
 			}
 			
 			model.update();
 			
-	
+			for(int i = 0; i < pickupNodes.size(); i++) {
+				for(int k = 0; k < vehicles.size(); k++) {
+					for(int r = 0; i < routes.size(); r++) {
+						this.visitedPickupsLeftHand[i].addTerm(0, this.lambdaVars[k][r]);
+						this.visitedPickupsCon[i] = model.addConstr(this.visitedPickupsLeftHand[i], GRB.LESS_EQUAL,1,"visitedPickupCon"+i);	
+					}
+				}			
+			}
+			
+			model.update();
+			
+			for(int k = 0; k < vehicles.size(); k++) {
+				for (int r = 0; r < routes.size(); r++) {
+					this.oneVisitLeftHand[k].addTerm(1, this.lambdaVars[k][r]);
+					this.oneVisitCon[k] = model.addConstr(this.oneVisitLeftHand[k], GRB.LESS_EQUAL, 1, "oneVisitCon"+k);		// skal egentlig være Equal 	
+				}
+			}
+			
+			model.update();
+
 		}	
 		
-		
-		
-		public void MasterProblem (int profit, Route route)  {
-			try {
-				
-				double dual1 = 0;
-				double dual2 = 0;
-		
-			while(dual1 > 0.0 && dual2 > 0.0) {
-				
-				PathBuilder builder;
-				builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes);
-				builder.BuildPaths();
-				
-				
-			int numberOfVehicles = inputdata.numberOfVehicles;
-
-			GRBVar[][] lambdas = new GRBVar[numberOfVehicles][numRoutes];
-			for (int i = 0; i < numberOfVehicles; i++) {
-				for (int j = 0; j < numRoutes; j++) {
-					lambdas[i][j] = model.addVar(0.0, GRB.INFINITY, profit, GRB.CONTINUOUS, null);
-	    		}
+		public void addRoute(Route r) throws Exception{
+			
+			for(int i : r.pickupNodesVisited) {
+				for(int k = 0; k < vehicles.size(); k++) {
+					if(r.vehicle.number == k) {
+						model.chgCoeff(this.visitedPickupsCon[i], this.lambdaVars[k][r.number], 1);
+					}
+				}
 			}
-			
-			
-			// Objective function: profit * lambda 
-			
-			//for (int i = 0; i < numberOfVehicles; i++) {
-			//	for (int j = 0; j < numRoutes; j++) {
-					GRBLinExpr objective = new GRBLinExpr();
-					objective = new GRBLinExpr();
-					objective.addTerms(profit, lambdas);
-					model.setObjective(objective, GRB.MAXIMIZE);
-	    	//	}
-			//}
-			
-			// Constraint 1: Visited(ikr) * lambda <= 1
-			
-			GRBLinExpr c1;
-			for (int i = 0; i < pickupNodes.size(); i++) {	
-				c1 = new GRBLinExpr();
-				c1.addTerms(Visited[i], lambdas);
-				model.addConstr(c1, GRB.LESS_EQUAL, 1.0, "c1");
-			}
-			
-			dual1 = c1.get(GRB.DoubleAttr.Pi);
-			
-			
-			GRBLinExpr c2;
-			for(int i = 0; i < numberOfVehicles; i++) {
-				c2 = new GRBLinExpr();
-				c2.addTerms(null, lambdas[i]);
-				model.addConstr(c2, GRB.EQUAL, 1.0, "c2");
-			} 
-			
-			dual2 = c2.get(GRB.DoubleAttr.Pi);
-	       
-		//lambda[numberOfVehicles][numRoutes] = model.addVars( null, null, null, null, null);
-	      
-//	      GRBVar A = model.addVar(3, 0.0, 1.0, GRB.BINARY, "A");
-	      //GRBVar z = model.addVar(0.0, 1.0, 0.0, GRB.BINARY, "z");
-	      //GRBVar P = model.addVar(2, -GRB.INFINITY, GRB.INFINITY, GRB.CONTINUOUS, "profit");
-	      
-
-	      // Set objective: maximize profit * lambda
-		/*
-	      GRBLinExpr expr = new GRBLinExpr();
-	      expr = quicksum(model.getVars());
-	      expr.addTerms(profit, lambda[][]); 
-	      model.setObjective(expr, GRB.MAXIMIZE);
-
-	      // Add constraint: visited freight orders * lambda <= 1
-
-	      expr = new GRBLinExpr();
-	      expr.addTerm(visited, lambda); 
-	      model.addConstr(expr, GRB.LESS_EQUAL, 1.0, "c1");
-	      
-	      double dual1 = c1.get(GRB.DoubleAttr.Pi);
-
-	      // Add constraint: lambda = 1 forall vehicles
-
-	      expr = new GRBLinExpr();
-	      expr.addTerm(1.0, lambda); 
-	      model.addConstr(expr, GRB.EQUAL, 1.0, "c2");
-	      
-	      double dual2 = c2.get(GRB.DoubleAttr.Pi);
-	      
-	      
+		}
+		
+		//dual1 = c1.get(GRB.DoubleAttr.Pi);
+		
+	
+		
+	
 	      // Optimize model
 
-	      model.optimize();
+	   //   model.optimize();
 
-	      System.out.println(lambda.get(GRB.StringAttr.VarName)
-	                         + " " +lambda.get(GRB.DoubleAttr.X));
+	    //  System.out.println(lambda.get(GRB.StringAttr.VarName)
+	//                         + " " +lambda.get(GRB.DoubleAttr.X));
 	     // System.out.println(y.get(GRB.StringAttr.VarName)
 	      //                   + " " +y.get(GRB.DoubleAttr.X));
 	     // System.out.println(z.get(GRB.StringAttr.VarName)
 	      //                   + " " +z.get(GRB.DoubleAttr.X));
 
-	      System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
+	     // System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
 
-	
-	      */
-			
-			}
+
 			
 		      // Dispose of model and environment
 		   
-	      model.dispose();
-	      env.dispose();
-			   }
+	//      model.dispose();
+	 //     env.dispose();
 			   
-			   catch (GRBException e) {System.out.println("error code: " + e.getErrorCode() + "." + e.getMessage());
-			   }
-		   }
+			   
+			  
+		//   }
 			   
 		   
 	}

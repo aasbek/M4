@@ -29,6 +29,7 @@ public class Main {
 		Vector<Node> startDepots = new Vector<Node>();
 		Vector<Vehicle> vehicles = new Vector<Vehicle>();
 		Vector<Route> routes = new Vector<Route>();
+		Vehicle vehicle = new Vehicle();
 		
 		
 		InstanceData inputdata = new InstanceData(datafile);
@@ -37,7 +38,7 @@ public class Main {
 
 		PathBuilder builder;
 		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes, vehicles);
-		builder.BuildPaths();
+		builder.BuildPaths(vehicle);
 		
 		//time
 		long endTime = System.nanoTime();
