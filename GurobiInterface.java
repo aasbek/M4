@@ -14,14 +14,15 @@ import gurobi.*;
 	    GRBModel  model = new GRBModel(env);
 	    
 	    // Creating Gurobi variables
-	    private GRBVar[][] lambda;
+	    private Vector<GRBVar> variables;
+	    private GRBVar[][] lambdaVars;
 		
 	    // Creating Gurobi constraints
-		public GRBConstr[] visitedPickups;
-		public GRBConstr[] oneVisit; 
+		public GRBConstr[] visitedPickupsCon;
+		public GRBConstr[] oneVisitCon; 
 		
 		// Creating Gurobi objective function
-		public GRBLinExpr obj;
+		public GRBLinExpr objective;
 		
 	    public InstanceData inputdata;
 		public double profit;
@@ -34,27 +35,55 @@ import gurobi.*;
 		public Vector<Route> routes;
 		public Vector<Vehicle> vehicles;
 		public PathBuilder builder;
-		
+		public Route route;
 		 
 		private Hashtable<Integer, Label> pathList;
 		
 		
 		
-		public GurobiInterface(InstanceData inputdata, Vector<Node> PickupNodes, Vector<Vehicle> vehicles) throws GRBException {
+		public GurobiInterface(InstanceData inputdata, Vector<Node> pickupNodes, Vector<Vehicle> vehicles) throws GRBException {
 			this.vehicles = vehicles; 
-			this.builder = new PathBuilder(vessels, customers, inputdata);
+			this.builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot, inputdata, pw, routes, vehicles);
 			this.path = route.path;
 			this.profit = route.profit;
 			this.inputdata = inputdata;
-			//GRBConstr c1;
-		    //GRBConstr c2;
-		    //GRBVar lambda[][];
-		    //this.env  = new GRBEnv("mip1.log");
-		    //GRBModel  model = new GRBModel(env);
-		    int numRoutes = pathBuilder.numRoutes;
+			buildProblem();
+			
 		}
 		
+		public void buildProblem() throws Exception {
+			this.objective = new GRBLinExpr();
 			
+			this.variables = new Vector<GRBVar>();
+			this.lambdaVars = new GRBVar[vehicles.size()][routes.size()];
+			
+			this.visitedPickupsCon = new GRBConstr[pickupNodes.size()];
+			this.oneVisitCon = new GRBConstr[vehicles.size()];
+			
+			for(int i = 0; i < pickupNodes.size(); i++) {
+				visitedPickupsCon[i] = model.addConstr(new GRBLinExpr(), GRB.LESS_EQUAL,1,"visitedPickupCon"+i);			
+			}
+			
+			for(int i = 0; i < vehicles.size(); i++) {
+				oneVisitCon[i] = model.addConstr(new GRBLinExpr(), GRB.LESS_EQUAL, 1, "oneVisitCon"+i);		// skal egentlig være Equal 	
+			}
+			this.optionalVars[i]
+			model.chgCoeff(this.visitedPickupsCon[i], , -1);
+			
+			model.update();
+			
+			for(int i = 0; i < vehicles.size(); i++) {
+				for (int j = 0; j < routes.size(); j++) {
+					this.lambdaVars[i][j] = model.addVar(0, GRB.INFINITY, profit, GRB.INTEGER, "lambda_"+i);
+					
+					this.objective.addTerm(profit, this.lambdaVars[i][j]);
+				}
+			}
+			
+			model.update();
+			
+	
+		}	
 		
 		
 		
