@@ -4,8 +4,14 @@ import java.util.Vector;
 
 
 	public class Label {
-		public int labelNumber;
+		public int bestLabelNumber;
 		public Vehicle vehicle;
+		public Vector<Node> path;
+		public Vector<Integer> pickupNodesVisited;
+		public float pickupDual;
+		public float totalPickupDual;
+		public float vehicleDual;
+		public float reducedCost;
 		public float time; 
 		public float profit;
 		public float weightCapacityUsed;
@@ -26,7 +32,7 @@ import java.util.Vector;
 		
 
 	public String toString() {
-		String string = "Node: " + node.number + ", Location: " + node.location + " , " + node.locationName + ", Time: " + time + ", Profit: "+ profit +
+		String string = "Node: " + node.number + ", Location: " + node.location + " , " + node.locationName + ", Time: " + time + ", Profit: "+ profit + ", Reduced cost: " + reducedCost +
 				", unreachablePickupNodes: " + unreachablePickupNodes + ", openNodes: " + openNodes + ", dailyDrivingTime: " + dailyDrivingTime + ", startTimeDailyRest: " + startTimeDailyRest + ", numberDailyRests: " + numberDailyRests + ", StartTimeIntermediateBreak: "+ startTimeIntermediateBreak + ", consecutiveDrivingTime: " + consecutiveDrivingTime + ", workingTime: " + consecutiveWorkingTime + ", totalDistance: " + totalDistance;
 		
 		// ", WeightCapacityUsed: " + weightCapacityUsed + ", VolumeCapacityUsed: " + volumeCapacityUsed+ 

@@ -7,10 +7,10 @@ import java.util.Vector;
 
 public class Main {
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws Exception {
 		long startTime = System.nanoTime();
 		
-		String datafile = "10P5R1V_java.txt";
+		String datafile = "10P5R2V_java.txt";
 		
 		File file = new File ("8P5R1V_java_results.txt");
 		
@@ -30,15 +30,24 @@ public class Main {
 		Vector<Vehicle> vehicles = new Vector<Vehicle>();
 		Vector<Route> routes = new Vector<Route>();
 		Vehicle vehicle = new Vehicle();
+		Vector<Float> dualVisitedPickupsCon = new Vector<Float>();  
+		Vector<Float> dualOneVisitCon = new Vector<Float>();
+		//Vector<Float> dualVisitedPickupsCon;
+		//Vector<Float> dualOneVisitCon;
+		
+		
 		
 		
 		InstanceData inputdata = new InstanceData(datafile);
+		//PathBuilder builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes, vehicles);
 
 		InputReader.inputReader(datafile, nodes, inputdata, depot, pickupNodes, deliveryNodes, startDepots, vehicles);
 
-		PathBuilder builder;
-		builder = new PathBuilder(pickupNodes, deliveryNodes, nodes, depot,inputdata, pw, routes, vehicles);
-		builder.BuildPaths(vehicle);
+		GurobiInterface solver = new GurobiInterface(inputdata, nodes, depot, deliveryNodes, pickupNodes, vehicles, dualVisitedPickupsCon, dualOneVisitCon, pw);
+		solver.solveProblem();
+		//PathBuilder builder;
+		
+		//builder.BuildPaths(vehicle);
 		
 		//time
 		long endTime = System.nanoTime();

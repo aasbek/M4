@@ -103,6 +103,7 @@ public class InputReader {
 			for(int i = 1; i < list1.length; i++){
 				int number2 = Integer.parseInt(list1[i].trim());
 				Vehicle v = new Vehicle ();
+				v.number = i-1;
 				Node startDepot = new Node (0);
 				startDepot.location = number2;
 				startDepot.type = "Depot";
