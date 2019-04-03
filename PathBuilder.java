@@ -226,7 +226,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			return L2;
 		}
@@ -287,7 +287,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable 
 			for(Node pickup: pickupNodes) {
@@ -557,7 +557,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			return L2;
 		}
@@ -618,7 +618,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable 
 			for(Node pickup: pickupNodes) {
@@ -861,7 +861,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			return L2;
 		}
@@ -921,7 +921,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable
 			for(Node pickup: pickupNodes) {
@@ -1177,7 +1177,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 				
 			return L2;
 		}
@@ -1237,7 +1237,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable
 			for(Node pickup: pickupNodes) {
@@ -1506,7 +1506,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 				
 			return L2;
 		}
@@ -1566,7 +1566,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable
 			for(Node pickup: pickupNodes) {
@@ -1846,7 +1846,7 @@ public class PathBuilder {
 							- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 				
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L2.profit - L2.totalPickupDual;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			return L2;
 		}
@@ -1906,7 +1906,7 @@ public class PathBuilder {
 					- (inputdata.laborCostperHour + inputdata.otherTimeDependentCostsPerKm)* (L2.time - L.time);
 			
 			// Calculating the reduced cost of the label
-			L2.reducedCost = L.reducedCost;
+			L2.reducedCost = L2.profit - L2.totalPickupDual - L2.vehicleDual;
 			
 			// Running preprocessing and checking whether the node in unreachable
 			for(Node pickup: pickupNodes) {
@@ -1928,7 +1928,8 @@ public class PathBuilder {
 		// Initializing label
 		Label L = new Label();
 		L.bestLabelNumber = 0;
-		L.node = nodes.get(0);
+		L.vehicle = vehicle;
+		L.node = vehicle.startDepot;
 		L.time = Float.parseFloat("0");
 		L.profit = 0;
 		L.weightCapacityUsed = 0;
@@ -1942,14 +1943,14 @@ public class PathBuilder {
 		L.startTimeIntermediateBreak = 0;
 		L.consecutiveDrivingTime = 0;
 		L.consecutiveWorkingTime = 0;
-		L.vehicle = vehicle;
-		for(int k = 0; k < vehicles.size(); k++) {
-			System.out.println("Vehicle:" +vehicle.number);
-			System.out.println(dualOneVisitCon.get(k));
-		}
+		
+	//	for(int k = 0; k < vehicles.size(); k++) {
+	//		System.out.println("Vehicle:" +vehicle.number);
+	//		System.out.println(dualOneVisitCon.get(k));
+	//	}
 		L.vehicleDual = dualOneVisitCon.get(vehicle.number);
 		L.pickupDual = 0;
-		L.reducedCost = 0;
+		L.reducedCost = L.profit -L.totalPickupDual - L.vehicleDual;
 		L.totalPickupDual = 0;
 		// Creating lists unprocessed labels at node i, and processed labels at node i
 		ArrayList<Vector<Label>> unprocessedAtNode = new ArrayList<Vector<Label>>();
@@ -2231,7 +2232,7 @@ public class PathBuilder {
 		pw.println("number of dominated labels: "+numberOfDominatedLabels);
 		System.out.println("The best label is:");
 		pw.println ("The best label is: ");
-		System.out.println(findBestLabel(list).toString());
+		//System.out.println(findBestLabel(list).toString());
 		//pw.println(findBestLabel(list).toString());
 		//for(Label i : list) {
 		//System.out.println(i.toString());

@@ -110,6 +110,8 @@ public class InputReader {
 				startDepot.getLocation(number2);
 				vehicles.add(v);
 				v.startDepot = startDepot;
+				startDepot.number = 0;
+				System.out.println(v.startDepot.location);
 				depot.get(i-1).location = number2;
 				depot.get(i-1).getLocation(number2);
 			}

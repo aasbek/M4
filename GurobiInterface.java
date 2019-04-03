@@ -114,7 +114,7 @@ import gurobi.*;
 			for(int k = 0; k < vehicles.size(); k++) {
 				for (int r = 0; r < numberOfRoutes; r++) {
 				//	this.oneVisitLeftHand[k].addTerm(1, this.lambdaVars[k][r]);
-					this.oneVisitCon[k] = model.addConstr(new GRBLinExpr(), GRB.LESS_EQUAL, 1, "oneVisitCon"+k);		// skal egentlig være Equal 	
+					this.oneVisitCon[k] = model.addConstr(new GRBLinExpr(), GRB.EQUAL, 1, "oneVisitCon"+k);		// skal egentlig være Equal 	
 					//float dualVehicle_k = (float) oneVisitCon[k].get(GRB.DoubleAttr.Pi);
 					//this.dualOneVisitCon.add(dualVehicle_k);
 				}
@@ -173,26 +173,7 @@ import gurobi.*;
 			profit = bestLabel.profit;
 			numberOfRoutes = 1;
 			
-			
-			
-			//if(bestLabel.reducedCost - profit == 0) {
-				
-			//	buildProblem();
-			//	System.out.println("while");
-			//	addRoute(bestLabel);
-			//	model.optimize();
-				
-				
-			
-	
-		//		list = builder.BuildPaths(vehicle, dualVisitedPickupsCon, dualOneVisitCon);
-			//	bestLabel = builder.findBestLabel(list);
-			//	profit = bestLabel.profit;
-					
-			//	numberOfRoutes += 1;	
-			
-			
-			while(bestLabel.reducedCost - profit >= 0 && vehicles.size() != 1) {
+			while((bestLabel.reducedCost < 0 && vehicles.size() != 1) || (bestLabel.reducedCost - profit == 0 && numberOfRoutes == 1) ) {
 				
 				buildProblem();
 				System.out.println("while");
@@ -202,23 +183,53 @@ import gurobi.*;
 				for(int i = 0; i < pickupNodes.size(); i++) {
 					float dualPickup_i = (float) visitedPickupsCon[i].get(GRB.DoubleAttr.Pi);
 					this.dualVisitedPickupsCon.add(dualPickup_i);
+					System.out.println("HER");
+					System.out.println(dualVisitedPickupsCon.get(i));
 				}
 				
 				for(int k = 0; k < vehicles.size(); k++) {
 					float dualVehicle_k = (float) oneVisitCon[k].get(GRB.DoubleAttr.Pi);
 					this.dualOneVisitCon.add(dualVehicle_k);
-					System.out.println("HER");
-					System.out.println(dualOneVisitCon.get(k));
+					//System.out.println("HER");
+					//System.out.println(dualOneVisitCon.get(k));
 				}
-	
+				
 				for(int k = 0; k < vehicles.size(); k++) {
+					for (int r = 0; r < numberOfRoutes; r++) {
+						System.out.println(lambdaVars[k][r].get(GRB.StringAttr.VarName)  + " " +lambdaVars[k][r].get(GRB.DoubleAttr.X));
+					}}
+						
+				for(int k = 0; k < vehicles.size(); k++) {
+					System.out.println(k);
 					list = builder.BuildPaths(vehicles.get(k), dualVisitedPickupsCon, dualOneVisitCon);
 					bestLabel = builder.findBestLabel(list);
 					profit = bestLabel.profit;
-					
 					numberOfRoutes += 1;	
+					
+					buildProblem();
+					addRoute(bestLabel);
+					model.optimize();
+					
+					for( k = 0; k < vehicles.size(); k++) {
+						for (int r = 0; r < numberOfRoutes; r++) {
+							System.out.println(lambdaVars[k][r].get(GRB.StringAttr.VarName)  + " " +lambdaVars[k][r].get(GRB.DoubleAttr.X));
+						}}
+					
+					for(int i = 0; i < pickupNodes.size(); i++) {
+						float dualPickup_i = (float) visitedPickupsCon[i].get(GRB.DoubleAttr.Pi);
+						this.dualVisitedPickupsCon.add(dualPickup_i);
+						System.out.println("HER");
+						System.out.println(dualVisitedPickupsCon.get(i));
+					}
+					
+					for(k = 0; k < vehicles.size(); k++) {
+						float dualVehicle_k = (float) oneVisitCon[k].get(GRB.DoubleAttr.Pi);
+						this.dualOneVisitCon.add(dualVehicle_k);
+						System.out.println("HER2");
+						System.out.println(dualOneVisitCon.get(k));
+					}
+					
 				}
-			//}
 		}
 	      
 		model.dispose();
@@ -241,15 +252,6 @@ import gurobi.*;
 	      //                   + " " +z.get(GRB.DoubleAttr.X));
 
 	     // System.out.println("Obj: " + model.get(GRB.DoubleAttr.ObjVal));
-
-
-			
-		      // Dispose of model and environment
-		   
-	//      model.dispose();
-	 //     env.dispose();
-			   
-			   
 			  
 		//   }
 			   
