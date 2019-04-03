@@ -2232,7 +2232,7 @@ public class PathBuilder {
 		pw.println("number of dominated labels: "+numberOfDominatedLabels);
 		System.out.println("The best label is:");
 		pw.println ("The best label is: ");
-		//System.out.println(findBestLabel(list).toString());
+		System.out.println(findBestLabel(list).toString());
 		//pw.println(findBestLabel(list).toString());
 		//for(Label i : list) {
 		//System.out.println(i.toString());
