@@ -22,6 +22,8 @@ public class PathBuilder {
 	int routeNumber = 1;
 	public Vector<Float> dualVisitedPickupsCon;
 	public Vector<Float> dualOneVisitCon;
+	//int bestLabelNumber = 0;
+
 
 	public PathBuilder(Vector<Node> pickupNodes, Vector<Node> deliveryNodes, Vector<Node> nodes, Vector<Node> depot, InstanceData inputdata, PrintWriter pw, Vector<Vehicle> vehicles) {
 		this.nodes = nodes;
@@ -1927,7 +1929,7 @@ public class PathBuilder {
 		Vector<Label> list = new Vector<Label>();   
 		// Initializing label
 		Label L = new Label();
-		L.bestLabelNumber = 0;
+	//	L.bestLabelNumber = 0;
 		L.vehicle = vehicle;
 		L.node = vehicle.startDepot;
 		L.time = Float.parseFloat("0");
@@ -2330,7 +2332,7 @@ public class PathBuilder {
 		if (bestLabel == null) {
 			throw new NullPointerException ("No feasible solution");	
 		}
-		int bestLabelNumber = 0;
+	
 		
 		//Route route = new Route();
 		//routes.add(route);
@@ -2355,9 +2357,10 @@ public class PathBuilder {
 		
 		
 		
-		bestLabel.bestLabelNumber = bestLabelNumber;
-		bestLabelNumber += 1;
+	//	bestLabel.bestLabelNumber = bestLabelNumber;
+		 //bestLabelNumber += 1;
 		
+	
 		pw.println(bestLabel.toString());
 		
 	
