@@ -20,15 +20,15 @@ public class InputReader {
 				int number = Integer.parseInt(list1[i].trim());
 				Node hello = new Node(number);
 				nodes.add(hello);
-				if(number == 0 || number == 1) {
-					hello.type = "Depot";
-					depot.add(hello);
-				}
-				else if((number%2)==0) {
+				//if(number == 1) {
+				//	hello.type = "Depot";
+				//	depot.add(hello);
+				//}
+				if((number%2)==0 && number != 0) {
 					hello.type = "PickupNode";
 					pickupNodes.add(hello);
 				}
-				else {
+				else if (number > 2  ) {
 					hello.type = "DeliveryNode";
 					deliveryNodes.add(hello);
 				}
@@ -111,9 +111,10 @@ public class InputReader {
 				vehicles.add(v);
 				v.startDepot = startDepot;
 				startDepot.number = 0;
-				System.out.println(v.startDepot.location);
-				depot.get(i-1).location = number2;
-				depot.get(i-1).getLocation(number2);
+				depot.add(startDepot);
+				
+			//	depot.get(i).location = number2;
+			//	depot.get(i).getLocation(number2);
 			}
 			
 			// Finding the number of vehicles in the data file
@@ -123,8 +124,19 @@ public class InputReader {
 			line = fr.readLine();
 			list1 = line.split(",");
 			int number = Integer.parseInt(list1[1].trim());
-			depot.get(1).location = number;
-			depot.get(1).getLocation(number);
+			Node endDepot = new Node(1);
+			endDepot.type = "Depot";
+			endDepot.location = number;
+			endDepot.getLocation(number);
+			depot.add(endDepot);
+			nodes.set(1, endDepot);
+		//	depot.get(0).location = number;
+		//	depot.get(0).getLocation(number);
+			//System.out.println(depot.get(0).location);
+			
+			for (int i = 0; i < depot.size(); i++) {
+				System.out.println(depot.get(i).location);
+			}
 			
 			// Counting the number of cities
 			line = fr.readLine();

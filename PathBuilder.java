@@ -1945,6 +1945,7 @@ public class PathBuilder {
 		L.startTimeIntermediateBreak = 0;
 		L.consecutiveDrivingTime = 0;
 		L.consecutiveWorkingTime = 0;
+		nodes.get(0).location = vehicle.startDepot.location;
 		
 	//	for(int k = 0; k < vehicles.size(); k++) {
 	//		System.out.println("Vehicle:" +vehicle.number);
